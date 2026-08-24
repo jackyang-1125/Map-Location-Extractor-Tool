@@ -155,6 +155,19 @@
     max-width:640px;
     word-break:break-all;
   }
+  .divider-container {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    max-width:640px;
+    margin: 4px 0;
+  }
+  .divider-line {
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
   .credit-tag{
     margin-top:20px;
     font-size:11px;
@@ -309,11 +322,25 @@
 <!-- Landing Screen -->
 <div id="landing">
   <h1>🌍 Map Location Extractor</h1>
-  <p class="sub">Paste any URL returning location JSON data (any length, any format). Fetch and view markers on an interactive map, search, export to JSON, and optionally auto-fill missing panorama data.</p>
+  <p class="sub">Paste any URL returning location JSON data, OR upload an unpatched JSON map file to repair missing panoramas.</p>
+  
   <form id="landingForm">
     <input type="text" id="urlInput" placeholder="Paste a full URL, e.g. https://example.com/api/map-data" autocomplete="off" spellcheck="false">
     <button type="submit" id="goBtn">Fetch</button>
   </form>
+
+  <div class="divider-container">
+    <div class="divider-line"></div>
+    <span style="font-size:12px; color:var(--muted); font-weight:600;">OR</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- Local File Upload for Quick Repair -->
+  <button type="button" class="ghost" id="uploadFileBtn" style="padding:11px 20px; font-size:13.5px; width:100%; max-width:640px;">
+    📁 Upload Unpatched JSON File to Repair
+  </button>
+  <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
+
   <div id="landingExample">https://example.com/api/map-data</div>
   <div class="credit-tag">v0.1 · Human Prompted, AI Crafted</div>
 </div>
@@ -323,7 +350,7 @@
   <header>
     <input type="text" id="appUrlInput" autocomplete="off" spellcheck="false">
     <button id="refetchBtn">Refetch</button>
-    <button class="secondary" id="backBtn">← New Query</button>
+    <button class="secondary" id="homeBtn">🏠 Home</button>
     <button id="themeToggleApp" class="ghost theme-btn" style="margin-left:8px;">🌙 Dark Mode</button>
     <button id="appTermsBtn" class="secondary" style="margin-left:4px;">Terms of Use</button>
     <div id="status">No query yet</div>
@@ -444,7 +471,7 @@
   const urlInput = document.getElementById("urlInput");
   const appUrlInput = document.getElementById("appUrlInput");
   const refetchBtn = document.getElementById("refetchBtn");
-  const backBtn = document.getElementById("backBtn");
+  const homeBtn = document.getElementById("homeBtn");
   const statusEl = document.getElementById("status");
   const formatBox = document.getElementById("formatBox");
   const rawJsonEl = document.getElementById("rawJson");
@@ -461,6 +488,10 @@
   const autoProgressEl = document.getElementById("autoProgress");
   const autoBar = document.getElementById("autoBar");
   const locSearch = document.getElementById("locSearch");
+
+  // Local File Upload Refs
+  const uploadFileBtn = document.getElementById("uploadFileBtn");
+  const fileInput = document.getElementById("fileInput");
 
   // Modal Refs
   const termsModal = document.getElementById("termsModal");
@@ -490,6 +521,30 @@
   autoCheckbox.addEventListener("change", () => {
     autoPanel.style.display = autoCheckbox.checked ? "block" : "none";
     localStorage.setItem("autoFillChecked", autoCheckbox.checked);
+  });
+
+  // ============================================================
+  // Local File Upload Logic (Quick Repair Mode)
+  // ============================================================
+  uploadFileBtn.addEventListener("click", () => fileInput.click());
+
+  fileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target.result;
+        const json = JSON.parse(text);
+        const baseName = file.name.replace(/\.[^/.]+$/, "");
+        loadJsonContent(json, baseName, `Local File: ${file.name}`);
+      } catch (err) {
+        alert("Invalid JSON file! Please upload a valid JSON map file.");
+      }
+    };
+    reader.readAsText(file);
+    fileInput.value = ""; // Reset for re-upload
   });
 
   // ============================================================
@@ -694,7 +749,43 @@
   }
 
   // ============================================================
-  // Fetch
+  // JSON Processing Engine (Unified for URL & File Upload)
+  // ============================================================
+  function loadJsonContent(json, suggestedName, displaySource) {
+    showApp(displaySource);
+    hasFetchedOnce = true;
+    formatBox.textContent = "";
+    rawJsonEl.textContent = "";
+    
+    if (suggestedName) {
+      mapNameInput.value = suggestedName.replace(/_original|_autofilled$/i, "");
+    }
+
+    downloadOriginalBtn.disabled = true;
+    downloadAutoFilledBtn.disabled = true;
+    downloadAutoFilledBtn.classList.remove("highlighted");
+
+    const rawPoints = extractPoints(json);
+    currentPoints = rawPoints.map(p => ({lat:p.lat, lng:p.lng, raw:p.raw, custom: toCustomCoordinate(p)}));
+
+    // Deep copy snapshot for Original export option
+    originalCustomCoords = JSON.parse(JSON.stringify(currentPoints.map(p => p.custom)));
+
+    formatBox.innerHTML = describeFormat(json, rawPoints);
+    rawJsonEl.textContent = JSON.stringify(json, null, 2).slice(0, 20000);
+
+    if (currentPoints.length){
+      renderMarkers();
+      setStatus(`Loaded · ${currentPoints.length} location(s)`, "ok");
+      downloadOriginalBtn.disabled = false;
+    } else {
+      clusterGroup.clearLayers();
+      setStatus(`No coordinates detected — inspect raw JSON`, "err");
+    }
+  }
+
+  // ============================================================
+  // Fetch via URL
   // ============================================================
   async function doFetch(rawUrl){
     const url = (rawUrl || "").trim();
@@ -707,11 +798,8 @@
     setStatus(`Fetching… ${url}`);
     formatBox.textContent = "";
     rawJsonEl.textContent = "";
-    
-    // Enable Original Export immediately
+
     downloadOriginalBtn.disabled = true;
-    
-    // Keep Auto-Filled Export DISABLED until "Start Auto-Fill" is clicked and finishes!
     downloadAutoFilledBtn.disabled = true;
     downloadAutoFilledBtn.classList.remove("highlighted");
 
@@ -731,23 +819,7 @@
         return;
       }
 
-      const rawPoints = extractPoints(json);
-      currentPoints = rawPoints.map(p => ({lat:p.lat, lng:p.lng, raw:p.raw, custom: toCustomCoordinate(p)}));
-
-      // Deep copy snapshot for Original export option
-      originalCustomCoords = JSON.parse(JSON.stringify(currentPoints.map(p => p.custom)));
-
-      formatBox.innerHTML = describeFormat(json, rawPoints);
-      rawJsonEl.textContent = JSON.stringify(json, null, 2).slice(0, 20000);
-
-      if (currentPoints.length){
-        renderMarkers();
-        setStatus(`HTTP ${res.status} · ${currentPoints.length} location(s)`, "ok");
-        downloadOriginalBtn.disabled = false;
-      } else {
-        clusterGroup.clearLayers();
-        setStatus(`HTTP ${res.status} · no coordinates detected — inspect raw JSON`, "err");
-      }
+      loadJsonContent(json, "", url);
     }catch(err){
       formatBox.innerHTML = `<b style="color:var(--danger)">Request failed</b><br>${escapeHtml(String(err))}<br><br>Common cause: Target server doesn't allow CORS.`;
       rawJsonEl.textContent = "(no data available)";
@@ -766,6 +838,14 @@
     setTimeout(() => { map.invalidateSize(); }, 200);
   }
 
+  function goHome(){
+    app.style.display = "none";
+    landingControls.style.display = "flex";
+    landing.style.display = "flex";
+    urlInput.value = appUrlInput.value;
+    urlInput.focus();
+  }
+
   landingForm.addEventListener("submit", e=>{
     e.preventDefault();
     doFetch(urlInput.value);
@@ -774,13 +854,7 @@
   appUrlInput.addEventListener("keydown", e=>{
     if (e.key === "Enter") doFetch(appUrlInput.value);
   });
-  backBtn.addEventListener("click", ()=>{
-    app.style.display = "none";
-    landingControls.style.display = "flex";
-    landing.style.display = "flex";
-    urlInput.value = appUrlInput.value;
-    urlInput.focus();
-  });
+  homeBtn.addEventListener("click", goHome);
 
   // ============================================================
   // Export Functions (Original vs Auto-Filled)
@@ -981,9 +1055,7 @@
     autoProgressEl.textContent = autoCancelled ? "Auto-fill cancelled." : `Auto-fill complete. Found: ${foundCount}, Not found: ${missCount}`;
     rawJsonEl.textContent = JSON.stringify({name: mapNameInput.value.trim() || "map", customCoordinates: currentPoints.map(p=>p.custom)}, null, 2).slice(0, 20000);
 
-    // ============================================================
-    // LIGHT UP & ENABLE "Export Auto-Filled JSON" button upon completion!
-    // ============================================================
+    // Light up & enable Auto-Filled Export Button
     downloadAutoFilledBtn.disabled = false;
     downloadAutoFilledBtn.classList.add("highlighted");
   });
