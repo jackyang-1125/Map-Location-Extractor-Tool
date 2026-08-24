@@ -78,7 +78,6 @@
     color: #ffffff !important; 
   }
   
-  /* 刪除按鈕特別樣式 */
   button.danger-ghost {
     background: transparent;
     color: var(--danger) !important;
@@ -98,6 +97,14 @@
   @keyframes pulse {
     0% { box-shadow: 0 0 5px rgba(95, 208, 138, 0.4); }
     100% { box-shadow: 0 0 16px rgba(95, 208, 138, 0.95); }
+  }
+
+  /* 速度切換按鈕的選中樣式 */
+  .speed-btn { transition: all 0.2s; }
+  .speed-btn.active {
+    background: var(--accent) !important;
+    color: #ffffff !important;
+    border-color: var(--accent) !important;
   }
 
   input[type="text"], input[type="password"], input[type="number"]{
@@ -427,7 +434,7 @@
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
 
   <div id="landingExample">https://example.com/api/map-data</div>
-  <div class="credit-tag">v0.9 · Human Prompted, AI Crafted</div>
+  <div class="credit-tag">v0.11 · Human Prompted, AI Crafted</div>
 </div>
 
 <div id="app">
@@ -471,6 +478,16 @@
           <label><input type="checkbox" id="autoCheckbox"><span>Auto-fill missing location data (panoId / capture date)</span></label>
         </div>
         <div id="autoPanel">
+          
+          <!-- 新增：快速速度切換按鈕區塊 -->
+          <div class="row" style="margin-top:10px; flex-wrap:nowrap; gap:6px;">
+            <span style="font-size:11.5px; color:var(--muted); margin-right:2px; font-weight:600;">Speed:</span>
+            <button type="button" class="secondary speed-btn active" data-delay="200" style="padding:4px 8px; font-size:11.5px; flex:1;">Safe</button>
+            <button type="button" class="secondary speed-btn" data-delay="20" style="padding:4px 8px; font-size:11.5px; flex:1;">20ms</button>
+            <button type="button" class="secondary speed-btn" data-delay="10" style="padding:4px 8px; font-size:11.5px; flex:1;">10ms</button>
+            <button type="button" class="secondary speed-btn" data-delay="0.1" style="padding:4px 8px; font-size:11.5px; flex:1;">0.1ms</button>
+          </div>
+
           <div class="row" style="margin-top:10px;">
             <button type="button" class="secondary" id="advancedToggleBtn">Advanced Options ▼</button>
           </div>
@@ -479,8 +496,25 @@
             <div class="row">
               <input type="password" id="apiKeyInput" placeholder="Paste Google Maps API Key (Optional)">
             </div>
-            <div class="row">
+            <div class="row" style="margin-top:4px;">
               <span style="font-size:11px; color:var(--muted);">By default, No-Key mode is used. Enter an API key only if you prefer using official Google Maps SDK quota.</span>
+            </div>
+            
+            <hr style="border:0; border-top:1px solid var(--line); margin:12px 0;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:12px; font-weight:600; color:var(--text);">Custom Delay (ms)</span>
+              <button type="button" class="secondary" id="resetDelayBtn" style="padding:4px 8px; font-size:11px;">Reset</button>
+            </div>
+            <div class="row" style="margin-top:8px; gap:12px;">
+              <label style="flex:1; display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
+                <span style="font-size:11px; color:var(--muted);">No-Key Delay</span>
+                <input type="number" id="noKeyDelayInput" value="200" min="0" step="10" style="width:100%;">
+              </label>
+              <label style="flex:1; display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
+                <span style="font-size:11px; color:var(--muted);">API Key Delay</span>
+                <input type="number" id="apiKeyDelayInput" value="120" min="0" step="10" style="width:100%;">
+              </label>
             </div>
           </div>
 
@@ -511,7 +545,7 @@
       </div>
 
       <div class="panel" style="text-align:center; color:var(--muted); font-size:11px;">
-        v0.9 · Human Prompted, AI Crafted
+        v0.11 · Human Prompted, AI Crafted
       </div>
 
     </div>
@@ -602,6 +636,13 @@
   const advancedToggleBtn = document.getElementById("advancedToggleBtn");
   const advancedBox = document.getElementById("advancedBox");
   const apiKeyInput = document.getElementById("apiKeyInput");
+  
+  // Speed controls
+  const speedBtns = document.querySelectorAll('.speed-btn');
+  const noKeyDelayInput = document.getElementById("noKeyDelayInput");
+  const apiKeyDelayInput = document.getElementById("apiKeyDelayInput");
+  const resetDelayBtn = document.getElementById("resetDelayBtn");
+
   const startAutoBtn = document.getElementById("startAutoBtn");
   const cancelAutoBtn = document.getElementById("cancelAutoBtn");
   const autoProgressEl = document.getElementById("autoProgress");
@@ -687,6 +728,32 @@
   autoCheckbox.addEventListener("change", () => {
     autoPanel.style.display = autoCheckbox.checked ? "block" : "none";
     localStorage.setItem("autoFillChecked", autoCheckbox.checked);
+  });
+
+  // ========== 速度切換邏輯 ==========
+  speedBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      speedBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const val = btn.getAttribute('data-delay');
+      noKeyDelayInput.value = val;
+      apiKeyDelayInput.value = val;
+    });
+  });
+
+  function onManualDelayChange() {
+    speedBtns.forEach(b => b.classList.remove('active'));
+  }
+  noKeyDelayInput.addEventListener('input', onManualDelayChange);
+  apiKeyDelayInput.addEventListener('input', onManualDelayChange);
+
+  resetDelayBtn.addEventListener("click", () => {
+    noKeyDelayInput.value = "200";
+    apiKeyDelayInput.value = "120";
+    speedBtns.forEach(b => {
+      if (b.getAttribute('data-delay') === "200") b.classList.add('active');
+      else b.classList.remove('active');
+    });
   });
 
   function handleFileUpload(e, isAppend) {
@@ -1509,7 +1576,9 @@
       autoBar.style.width = `${Math.round(done/total*100)}%`;
       autoProgressEl.textContent = `Progress: ${done} / ${total} | Found: ${foundCount} | Not found: ${missCount}`;
       
-      await sleep(svc ? 120 : 200);
+      let delayMs = svc ? parseFloat(apiKeyDelayInput.value) : parseFloat(noKeyDelayInput.value);
+      if (isNaN(delayMs) || delayMs < 0) delayMs = svc ? 120 : 200;
+      await sleep(delayMs);
     }
 
     autoRunning = false;
