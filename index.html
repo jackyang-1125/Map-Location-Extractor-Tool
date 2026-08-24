@@ -9,7 +9,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
 <style>
   :root{
-    /* Dark Theme Variables (Default) */
     --bg:#0f1418;
     --panel:#161d23;
     --panel-2:#1d262d;
@@ -24,7 +23,6 @@
   }
 
   body.light-theme {
-    /* Light Theme Variables */
     --bg:#f4f6f8;
     --panel:#ffffff;
     --panel-2:#f0f2f5;
@@ -49,20 +47,48 @@
   }
   button{
     background:var(--accent);
-    color:#08262a;
+    color:#ffffff;
     border:none;
     padding:8px 14px;
     border-radius:6px;
     font-size:13px;
     font-weight:600;
     cursor:pointer;
-    transition: filter 0.2s, background-color 0.2s, box-shadow 0.2s;
+    transition: filter 0.2s, background-color 0.2s, box-shadow 0.2s, color 0.2s;
   }
-  body.light-theme button { color: #ffffff; }
   button:hover{filter:brightness(1.08);}
   button:disabled{opacity:.4;cursor:default;filter:grayscale(0.6);}
   
-  /* Highlighted button effect when auto-fill finishes */
+  body.light-theme button { color: #ffffff; }
+  body.light-theme button.secondary { 
+    color: var(--text) !important; 
+    background: transparent;
+    border-color: var(--line);
+  }
+  body.light-theme button.secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent) !important;
+  }
+  body.light-theme button.ghost { 
+    color: var(--accent) !important; 
+    background: transparent;
+  }
+  body.light-theme button.ghost:hover { 
+    background: var(--accent); 
+    color: #ffffff !important; 
+  }
+  
+  /* 刪除按鈕特別樣式 */
+  button.danger-ghost {
+    background: transparent;
+    color: var(--danger) !important;
+    border: 1px solid var(--danger);
+  }
+  button.danger-ghost:hover {
+    background: var(--danger) !important;
+    color: #ffffff !important;
+  }
+
   button.highlighted {
     background: var(--good) !important;
     color: #08262a !important;
@@ -74,18 +100,6 @@
     100% { box-shadow: 0 0 16px rgba(95, 208, 138, 0.95); }
   }
 
-  button.secondary{
-    background:transparent;
-    color:var(--text);
-    border:1px solid var(--line);
-  }
-  button.secondary:hover{border-color:var(--accent);}
-  button.ghost{
-    background:transparent;
-    color:var(--accent);
-    border:1px solid var(--accent);
-  }
-  button.ghost:hover{background:var(--accent); color:#08262a;}
   input[type="text"], input[type="password"], input[type="number"]{
     background:var(--panel-2);
     border:1px solid var(--line);
@@ -98,7 +112,6 @@
   }
   input:focus{border-color:var(--accent);}
 
-  /* ---------- Top Bar Controls ---------- */
   .top-right-controls {
     position: fixed;
     top: 16px;
@@ -108,7 +121,44 @@
     z-index: 100;
   }
 
-  /* ---------- Landing ---------- */
+  .map-coverage-control {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    font-family: inherit;
+    margin: 0 10px 10px 0 !important;
+  }
+  .map-coverage-control .coverage-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--text);
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+  }
+  .map-coverage-control .coverage-toggle input{cursor:pointer;}
+  .map-coverage-control button#addStreetViewBtn{
+    width: 100%;
+    font-size: 12.5px;
+    padding: 6px 10px;
+    white-space: nowrap;
+  }
+  .map-coverage-control button#addStreetViewBtn.active{
+    background: var(--good) !important;
+    color: #08262a !important;
+  }
+  .leaflet-container.adding-streetview,
+  .leaflet-container.adding-streetview .leaflet-interactive{
+    cursor: crosshair !important;
+  }
+
   #landing{
     flex:1;
     display:flex;
@@ -175,7 +225,6 @@
     letter-spacing:.05em;
   }
 
-  /* ---------- App shell ---------- */
   #app{
     flex:1;
     display:none;
@@ -191,7 +240,7 @@
     gap:8px;
     align-items:center;
   }
-  header #appUrlInput{width:340px; max-width:38vw; font-family:var(--mono); font-size:12px;}
+  header #appUrlInput{width:300px; max-width:30vw; font-family:var(--mono); font-size:12px;}
   #status{
     font-size:12px;
     color:var(--muted);
@@ -207,7 +256,7 @@
     display:flex;
     min-height:0;
   }
-  #map{flex:1; background:#0a0d10; min-height:300px;}
+  #map{flex:1; background:#e5e9ec; min-height:300px;}
   #sidebar{
     width:420px;
     max-width:44vw;
@@ -267,13 +316,42 @@
   .legend{display:flex; gap:14px; font-size:11.5px; color:var(--muted); margin-top:6px;}
   .legend span{display:inline-flex; align-items:center; gap:5px;}
   .dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
-  .leaflet-popup-content{font-family:var(--mono); font-size:11.5px;}
 
-  /* ---------- Modal Terms Window ---------- */
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: var(--panel-2) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--line);
+    box-shadow: 0 3px 14px rgba(0,0,0,0.3);
+  }
+  .leaflet-popup-content{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color: var(--text) !important;
+    width: auto !important;
+  }
+  .sv-popup{width:280px; font-family:inherit;}
+  .sv-popup iframe{
+    width:100%; height:200px; border:0; border-radius:6px; display:block;
+    background: var(--panel);
+  }
+  .sv-popup .sv-coords{margin-top:8px; font-size:11px; color:var(--muted); font-family:var(--mono); margin-bottom:8px;}
+  .sv-popup details{margin-top:6px;}
+  .sv-popup summary{cursor:pointer; font-size:11px; color:var(--muted);}
+  .sv-popup pre{margin:6px 0 0; white-space:pre-wrap; font-size:11px; font-family:var(--mono);}
+  .sv-popup a{display:inline-block; margin-top:6px; font-size:11px; color:var(--accent);}
+
+  .streetview-coverage-tiles{
+    mix-blend-mode: multiply;
+  }
+
+  .google-dark-tiles {
+    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3);
+  }
+
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.82);
+    background: rgba(0,0,0,0.7);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -291,7 +369,7 @@
     max-height: 85vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
   }
   .modal-header {
     padding: 14px 18px;
@@ -321,15 +399,13 @@
   ::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;}
 </style>
 </head>
-<body>
+<body class="light-theme">
 
-<!-- Landing Top Right Controls -->
 <div class="top-right-controls" id="landingControls">
   <button id="themeToggleLanding" class="ghost theme-btn">🌙 Dark Mode</button>
   <button id="landingTermsBtn" class="secondary">Terms of Use</button>
 </div>
 
-<!-- Landing Screen -->
 <div id="landing">
   <h1>🌍 Map Location Extractor</h1>
   <p class="sub">Paste any URL returning location JSON data, OR upload an unpatched JSON map file to repair missing panoramas.</p>
@@ -345,21 +421,21 @@
     <div class="divider-line"></div>
   </div>
 
-  <!-- Local File Upload for Quick Repair -->
   <button type="button" class="ghost" id="uploadFileBtn" style="padding:11px 20px; font-size:13.5px; width:100%; max-width:640px;">
     📁 Upload Unpatched JSON File to Repair
   </button>
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
 
   <div id="landingExample">https://example.com/api/map-data</div>
-  <div class="credit-tag">v0.1 · Human Prompted, AI Crafted</div>
+  <div class="credit-tag">v0.8 · Human Prompted, AI Crafted</div>
 </div>
 
-<!-- Main App Shell -->
 <div id="app">
   <header>
-    <input type="text" id="appUrlInput" autocomplete="off" spellcheck="false">
-    <button id="refetchBtn">Refetch</button>
+    <input type="text" id="appUrlInput" placeholder="Paste URL to append data..." autocomplete="off" spellcheck="false">
+    <button id="addUrlBtn">Add URL</button>
+    <button id="addFileAppBtn" class="secondary">Add File</button>
+    <input type="file" id="appFileInput" accept=".json,application/json" style="display:none;">
     <button class="secondary" id="homeBtn">🏠 Home</button>
     <button id="themeToggleApp" class="ghost theme-btn" style="margin-left:8px;">🌙 Dark Mode</button>
     <button id="appTermsBtn" class="secondary" style="margin-left:4px;">Terms of Use</button>
@@ -375,7 +451,6 @@
         <div id="formatBox"></div>
       </div>
 
-      <!-- Export Panel with Dual Options -->
       <div class="panel">
         <h2>Export Map JSON</h2>
         <div class="row">
@@ -426,6 +501,7 @@
       <div class="panel" style="flex:1;">
         <h2>Raw JSON</h2>
         <pre id="rawJson">(no data yet)</pre>
+        <button id="showMoreJsonBtn" class="secondary" style="display:none; width:100%; margin-top:8px;">Show More</button>
       </div>
 
       <div class="panel" id="hintPanel">
@@ -435,14 +511,13 @@
       </div>
 
       <div class="panel" style="text-align:center; color:var(--muted); font-size:11px;">
-        v0.1 · Human Prompted, AI Crafted
+        v0.8 · Human Prompted, AI Crafted
       </div>
 
     </div>
   </main>
 </div>
 
-<!-- Modal Dialog for Terms of Use -->
 <div id="termsModal" class="modal-overlay" style="display:none;">
   <div class="modal-content">
     <div class="modal-header">
@@ -463,7 +538,6 @@
       The No-Key panorama lookup function interacts with public network endpoints. Users acknowledge that third-party endpoints may change, enforce rate limits, or become unavailable at any time.</p>
     </div>
     
-    <!-- Mandatory Checkbox & Agreement Footer -->
     <div class="modal-footer" id="termsFooter">
       <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; cursor:pointer;">
         <input type="checkbox" id="agreeCheckbox">
@@ -474,26 +548,52 @@
   </div>
 </div>
 
+<div id="addPointModal" class="modal-overlay" style="display:none;">
+  <div class="modal-content" style="max-width:340px;">
+    <div class="modal-header">
+      <h3>Add Street View Point</h3>
+    </div>
+    <div class="modal-body" id="addPointModalBody" style="padding:14px;">
+    </div>
+    <div class="modal-footer" style="flex-direction:row; justify-content:flex-end;">
+      <button type="button" class="secondary" id="cancelAddPointBtn">Cancel</button>
+      <button type="button" id="confirmAddPointBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="jsonModal" class="modal-overlay" style="display:none;">
+  <div class="modal-content" style="max-width:700px;">
+    <div class="modal-header">
+      <h3>Full Raw JSON</h3>
+      <button id="closeJsonModalBtn" class="secondary">✕ Close</button>
+    </div>
+    <div class="modal-body">
+      <pre id="jsonModalContent" style="margin:0; white-space:pre-wrap; font-family:var(--mono); font-size:11.5px;"></pre>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
 <script>
 (function(){
   "use strict";
 
-  // ============================================================
-  // DOM refs
-  // ============================================================
   const landing = document.getElementById("landing");
   const landingControls = document.getElementById("landingControls");
   const app = document.getElementById("app");
   const landingForm = document.getElementById("landingForm");
   const urlInput = document.getElementById("urlInput");
   const appUrlInput = document.getElementById("appUrlInput");
-  const refetchBtn = document.getElementById("refetchBtn");
+  const addUrlBtn = document.getElementById("addUrlBtn");
+  const addFileAppBtn = document.getElementById("addFileAppBtn");
+  const appFileInput = document.getElementById("appFileInput");
   const homeBtn = document.getElementById("homeBtn");
   const statusEl = document.getElementById("status");
   const formatBox = document.getElementById("formatBox");
   const rawJsonEl = document.getElementById("rawJson");
+  const showMoreJsonBtn = document.getElementById("showMoreJsonBtn");
   const mapNameInput = document.getElementById("mapNameInput");
   const downloadOriginalBtn = document.getElementById("downloadOriginalBtn");
   const downloadAutoFilledBtn = document.getElementById("downloadAutoFilledBtn");
@@ -507,33 +607,30 @@
   const autoProgressEl = document.getElementById("autoProgress");
   const autoBar = document.getElementById("autoBar");
   const locSearch = document.getElementById("locSearch");
-
-  // Local File Upload Refs
   const uploadFileBtn = document.getElementById("uploadFileBtn");
   const fileInput = document.getElementById("fileInput");
-
-  // Modal Refs
   const termsModal = document.getElementById("termsModal");
   const landingTermsBtn = document.getElementById("landingTermsBtn");
   const appTermsBtn = document.getElementById("appTermsBtn");
   const closeTermsBtn = document.getElementById("closeTermsBtn");
   const agreeCheckbox = document.getElementById("agreeCheckbox");
   const agreeTermsBtn = document.getElementById("agreeTermsBtn");
+  const jsonModal = document.getElementById("jsonModal");
+  const jsonModalContent = document.getElementById("jsonModalContent");
+  const closeJsonModalBtn = document.getElementById("closeJsonModalBtn");
 
   let hasFetchedOnce = false;
-  let currentPoints = [];       // Points modified during auto-fill
-  let originalCustomCoords = [];// Snapshot of original data before auto-fill
+  let currentPoints = [];       
+  let originalCustomCoords = [];
   let autoCancelled = false;
   let autoRunning = false;
   let isMandatoryTermsMode = false;
+  let seenCoords = new Set();
 
   function setStatus(html, cls){
     statusEl.innerHTML = cls ? `<span class="${cls}">${html}</span>` : html;
   }
 
-  // ============================================================
-  // Mandatory First-Load Agreement Check
-  // ============================================================
   const hasAgreedTerms = localStorage.getItem("termsAgreed") === "true";
 
   function showTermsModal(mandatory = false) {
@@ -555,7 +652,6 @@
     termsModal.style.display = "none";
   }
 
-  // Trigger Mandatory Terms Modal on First Visit
   if (!hasAgreedTerms) {
     showTermsModal(true);
   }
@@ -583,10 +679,6 @@
     }
   });
 
-  // ============================================================
-  // Auto-Fill Checkbox State Memory (localStorage)
-  // Default to Checked / Open unless explicitly unchecked
-  // ============================================================
   const savedAutoCheck = localStorage.getItem("autoFillChecked");
   const isAutoChecked = savedAutoCheck === null ? true : (savedAutoCheck === "true");
   autoCheckbox.checked = isAutoChecked;
@@ -597,81 +689,282 @@
     localStorage.setItem("autoFillChecked", autoCheckbox.checked);
   });
 
-  // ============================================================
-  // Local File Upload Logic (Quick Repair Mode)
-  // ============================================================
-  uploadFileBtn.addEventListener("click", () => fileInput.click());
-
-  fileInput.addEventListener("change", (e) => {
+  function handleFileUpload(e, isAppend) {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         const text = event.target.result;
         const json = JSON.parse(text);
         const baseName = file.name.replace(/\.[^/.]+$/, "");
-        loadJsonContent(json, baseName, `Local File: ${file.name}`);
+        loadJsonContent(json, baseName, isAppend);
       } catch (err) {
         alert("Invalid JSON file! Please upload a valid JSON map file.");
       }
     };
     reader.readAsText(file);
-    fileInput.value = ""; // Reset for re-upload
+    e.target.value = "";
+  }
+
+  uploadFileBtn.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", (e) => handleFileUpload(e, false));
+
+  addFileAppBtn.addEventListener("click", () => appFileInput.click());
+  appFileInput.addEventListener("change", (e) => handleFileUpload(e, true));
+
+  let currentTheme = 'light';
+  
+  const darkTileLayer = L.tileLayer("https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+    attribution: "&copy; Google Maps",
+    subdomains: ['0', '1', '2', '3'],
+    maxZoom: 20,
+    className: 'google-dark-tiles'
   });
 
-  // ============================================================
-  // Theme Switching Logic (Light / Dark Mode + TileLayer)
-  // ============================================================
-  let currentTheme = 'dark';
-  const darkTileLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
-    subdomains: "abcd", maxZoom: 19
-  });
-  const lightTileLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-    attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
-    subdomains: "abcd", maxZoom: 19
+  const lightTileLayer = L.tileLayer("https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+    attribution: "&copy; Google Maps",
+    subdomains: ['0', '1', '2', '3'],
+    maxZoom: 20
   });
 
   const map = L.map("map", {worldCopyJump:true}).setView([20,0], 2);
-  darkTileLayer.addTo(map);
+  lightTileLayer.addTo(map); 
 
   let clusterGroup = L.markerClusterGroup({chunkedLoading:true, maxClusterRadius:45});
   map.addLayer(clusterGroup);
 
+  const streetViewCoverageLayer = L.tileLayer(
+    "https://mts{s}.google.com/mapslt?lyrs=svv&x={x}&y={y}&z={z}&w=256&h=256&hl=en&style=40,18",
+    {
+      subdomains: ['0','1','2','3'],
+      maxZoom: 21,
+      opacity: 0.85,
+      zIndex: 450,
+      className: "streetview-coverage-tiles",
+      attribution: "&copy; Google Street View"
+    }
+  );
+
+  const MapCoverageControl = L.Control.extend({
+    options: { position: "bottomright" },
+    onAdd: function(){
+      const container = L.DomUtil.create("div", "map-coverage-control");
+      L.DomEvent.disableClickPropagation(container);
+      L.DomEvent.disableScrollPropagation(container);
+      container.innerHTML =
+        '<label class="coverage-toggle">' +
+          '<input type="checkbox" id="coverageCheckbox">' +
+          '<span>Show Street View coverage</span>' +
+        '</label>' +
+        '<button type="button" id="addStreetViewBtn" class="secondary">➕ Add Street View point</button>';
+      return container;
+    }
+  });
+  map.addControl(new MapCoverageControl());
+
+  const coverageCheckbox = document.getElementById("coverageCheckbox");
+  coverageCheckbox.addEventListener("change", () => {
+    if (coverageCheckbox.checked) {
+      streetViewCoverageLayer.addTo(map);
+    } else {
+      map.removeLayer(streetViewCoverageLayer);
+    }
+  });
+
+  // ========== 刪除地點功能 ==========
+  function deletePoint(id) {
+    const idx = currentPoints.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      const p = currentPoints[idx];
+      
+      // 1. 移除地圖標記
+      if (p.marker) {
+        clusterGroup.removeLayer(p.marker);
+      }
+      
+      // 2. 從陣列移除
+      currentPoints.splice(idx, 1);
+      
+      // 3. 更新 UI
+      renderRawJsonDisplay();
+      setStatus(`已刪除 1 個地點。總計剩餘: ${currentPoints.length}`, "ok");
+      
+      if (currentPoints.length === 0) {
+         downloadAutoFilledBtn.disabled = true;
+         downloadAutoFilledBtn.classList.remove("highlighted");
+      }
+    }
+  }
+
+  // 監聽 Popup 開啟，綁定刪除按鈕事件
+  map.on('popupopen', function(e) {
+    const popupNode = e.popup._contentNode;
+    if (!popupNode) return;
+    const delBtn = popupNode.querySelector('.delete-point-btn');
+    if (delBtn) {
+      delBtn.addEventListener('click', () => {
+        const confirmDel = confirm("確定要刪除這個地點嗎？\nAre you sure you want to delete this location?");
+        if (confirmDel) {
+          const id = delBtn.getAttribute('data-id');
+          deletePoint(id);
+          map.closePopup();
+        }
+      });
+    }
+  });
+
+  const addStreetViewBtn = document.getElementById("addStreetViewBtn");
+  const addPointModal = document.getElementById("addPointModal");
+  const addPointModalBody = document.getElementById("addPointModalBody");
+  const cancelAddPointBtn = document.getElementById("cancelAddPointBtn");
+  const confirmAddPointBtn = document.getElementById("confirmAddPointBtn");
+  let addStreetViewMode = false;
+  let pendingAddLatLng = null;
+
+  function setAddStreetViewMode(on){
+    addStreetViewMode = on;
+    const container = map.getContainer();
+    if (on){
+      container.classList.add("adding-streetview");
+      addStreetViewBtn.textContent = "✕ Cancel (click map to add)";
+      addStreetViewBtn.classList.add("active");
+    } else {
+      container.classList.remove("adding-streetview");
+      addStreetViewBtn.textContent = "➕ Add Street View point";
+      addStreetViewBtn.classList.remove("active");
+    }
+  }
+
+  addStreetViewBtn.addEventListener("click", () => setAddStreetViewMode(!addStreetViewMode));
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (jsonModal.style.display !== "none") closeJsonModal();
+      else if (addPointModal.style.display !== "none") closeAddPointModal();
+      else if (addStreetViewMode) setAddStreetViewMode(false);
+    }
+  });
+
+  function closeAddPointModal(){
+    addPointModal.style.display = "none";
+    pendingAddLatLng = null;
+  }
+
+  cancelAddPointBtn.addEventListener("click", closeAddPointModal);
+  addPointModal.addEventListener("click", (e) => {
+    if (e.target === addPointModal) closeAddPointModal();
+  });
+
+  map.on("click", (e) => {
+    if (!addStreetViewMode) return;
+    const wrapped = map.wrapLatLng(e.latlng);
+    pendingAddLatLng = wrapped;
+    const embedUrl = buildStreetViewEmbedUrl(wrapped.lat, wrapped.lng, 0, 0);
+    addPointModalBody.innerHTML =
+      `<div class="sv-popup" style="width:100%;">` +
+        `<iframe src="${embedUrl}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>` +
+        `<div class="sv-coords">${wrapped.lat.toFixed(6)}, ${wrapped.lng.toFixed(6)}</div>` +
+      `</div>`;
+    addPointModal.style.display = "flex";
+  });
+
+  confirmAddPointBtn.addEventListener("click", async () => {
+    if (!pendingAddLatLng) return;
+    const originalLat = pendingAddLatLng.lat;
+    const originalLng = pendingAddLatLng.lng;
+    closeAddPointModal();
+
+    setStatus("Checking Street View coverage at this location…");
+
+    const apiKeyVal = apiKeyInput.value.trim();
+    let result = null;
+    try {
+      if (apiKeyVal) {
+        await loadGoogleMapsSdk(apiKeyVal);
+        const svc = new google.maps.StreetViewService();
+        result = await getPanoramaWithKey(svc, originalLat, originalLng);
+      } else {
+        result = await getPanoramaNoKey(originalLat, originalLng);
+      }
+    } catch (err) {
+      result = null;
+    }
+
+    if (result) {
+      const finalLat = result.lat !== undefined ? result.lat : originalLat;
+      const finalLng = result.lng !== undefined ? result.lng : originalLng;
+
+      let key = finalLat.toFixed(6) + "," + finalLng.toFixed(6);
+      if (seenCoords.has(key)) {
+        let n = 1;
+        while (seenCoords.has(key + "#" + n)) n++;
+        key = key + "#" + n;
+      }
+      seenCoords.add(key);
+
+      const custom = {
+        lat: finalLat,
+        lng: finalLng,
+        heading: 0.001,
+        pitch: 0,
+        zoom: 0,
+        panoId: result.panoId,
+        countryCode: null,
+        stateCode: null,
+        extra: {
+          panoId: result.panoId
+        }
+      };
+      if (result.panoDate) custom.extra.panoDate = result.panoDate;
+
+      const newId = Math.random().toString(36).substring(2, 15);
+      const newPoint = { 
+        id: newId,
+        lat: finalLat, 
+        lng: finalLng, 
+        raw: { lat: finalLat, lng: finalLng }, 
+        custom: custom 
+      };
+
+      hasFetchedOnce = true;
+      currentPoints.push(newPoint);
+      renderMarkers([newPoint], true);
+      renderRawJsonDisplay();
+      downloadAutoFilledBtn.disabled = false;
+
+      setStatus(`已自動矯正並新增點位 (Auto-corrected to actual panorama). Total: ${currentPoints.length}`, "ok");
+    } else {
+      setStatus(`無法找到：此位置附近太遠或沒有街景 (Too far / Not found).`, "err");
+    }
+  });
+
   function toggleTheme() {
-    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
     const themeBtns = document.querySelectorAll('.theme-btn');
 
     if (currentTheme === 'light') {
       document.body.classList.add('light-theme');
       map.removeLayer(darkTileLayer);
       map.addLayer(lightTileLayer);
-      themeBtns.forEach(btn => btn.textContent = '☀️ Light Mode');
+      themeBtns.forEach(btn => btn.textContent = '🌙 Dark Mode');
     } else {
       document.body.classList.remove('light-theme');
       map.removeLayer(lightTileLayer);
       map.addLayer(darkTileLayer);
-      themeBtns.forEach(btn => btn.textContent = '🌙 Dark Mode');
+      themeBtns.forEach(btn => btn.textContent = '☀️ Light Mode');
     }
   }
 
   document.getElementById("themeToggleLanding").addEventListener("click", toggleTheme);
   document.getElementById("themeToggleApp").addEventListener("click", toggleTheme);
 
-  // ============================================================
-  // Advanced Options Toggle
-  // ============================================================
   advancedToggleBtn.addEventListener("click", () => {
     const isHidden = advancedBox.style.display === "none";
     advancedBox.style.display = isHidden ? "block" : "none";
     advancedToggleBtn.textContent = isHidden ? "Advanced Options ▲" : "Advanced Options ▼";
   });
 
-  // ============================================================
-  // Flexible coordinate extraction from arbitrary JSON
-  // ============================================================
   function extractPoints(json){
     const found = [];
 
@@ -716,13 +1009,7 @@
 
     walk(json, 0);
 
-    const seen = new Set();
-    return found.filter(p=>{
-      const key = JSON.stringify(p.raw);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    return found;
   }
 
   function toCustomCoordinate(p){
@@ -747,55 +1034,106 @@
     return !!(custom.extra && custom.extra.panoId);
   }
 
-  function describeFormat(json, points){
-    let topType;
-    if (Array.isArray(json)) topType = `Array (length ${json.length})`;
-    else if (typeof json === "object") topType = `Object (keys: ${Object.keys(json).join(", ")})`;
-    else topType = typeof json;
-
-    let sampleKeys = "";
-    if (points.length){
-      const raw = points[0].raw;
-      if (raw && typeof raw === "object" && !Array.isArray(raw)) sampleKeys = Object.keys(raw).join(", ");
-      else if (Array.isArray(raw)) sampleKeys = "[number, number] form";
-    }
-
-    return `
-      <div>Top-level type: <b>${topType}</b></div>
-      <div style="margin-top:6px;">Coordinates detected: <b>${points.length}</b></div>
-      ${sampleKeys ? `<div style="margin-top:6px;">Sample object fields: <b>${sampleKeys}</b></div>` : ""}
-    `;
-  }
-
   function escapeHtml(s){
     return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }
 
   function markerColor(custom){
-    return hasPano(custom) ? "#5fd08a" : "#e2685c";
+    return hasPano(custom) ? "#1a7f37" : "#cf222e";
   }
 
-  function renderMarkers(){
-    clusterGroup.clearLayers();
-    const markers = currentPoints.map(p=>{
+  function getStreetViewUrl(p) {
+    const lat = p.lat;
+    const lng = p.lng;
+    const panoId = (p.custom && p.custom.extra && p.custom.extra.panoId) || (p.custom && p.custom.panoId) || null;
+    const heading = (p.custom && typeof p.custom.heading === "number") ? p.custom.heading : 0;
+    const pitch = (p.custom && typeof p.custom.pitch === "number") ? p.custom.pitch : 0;
+    
+    let url = `https://www.google.com/maps/@?api=1&map_action=pano`;
+    if (panoId) {
+      url += `&pano=${encodeURIComponent(panoId)}&cbll=${lat},${lng}`;
+    } else {
+      url += `&viewpoint=${lat},${lng}`;
+    }
+    if (heading !== 0 || pitch !== 0) {
+      url += `&heading=${heading}&pitch=${pitch}`;
+    }
+    return url;
+  }
+
+  function buildStreetViewEmbedUrl(lat, lng, heading, pitch){
+    return `https://www.google.com/maps?layer=c&cbll=${lat},${lng}&cbp=11,${heading || 0},0,${pitch || 0},0&output=svembed`;
+  }
+
+  function buildEmbedPopupHtml(p){
+    const lat = p.lat;
+    const lng = p.lng;
+    const heading = (p.custom && typeof p.custom.heading === "number") ? p.custom.heading : 0;
+    const pitch = (p.custom && typeof p.custom.pitch === "number") ? p.custom.pitch : 0;
+    const embedUrl = buildStreetViewEmbedUrl(lat, lng, heading, pitch);
+
+    return `<div class="sv-popup">` +
+      `<iframe src="${embedUrl}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>` +
+      `<div class="sv-coords">${lat.toFixed(6)}, ${lng.toFixed(6)}</div>` +
+      `<button class="danger-ghost delete-point-btn" data-id="${p.id}" style="width:100%;">🗑️ 刪除此地點 (Delete)</button>` +
+    `</div>`;
+  }
+
+  function buildInfoPopupHtml(p){
+    const svUrl = getStreetViewUrl(p);
+    const jsonText = JSON.stringify(p.custom, null, 2);
+
+    return `<div class="sv-popup">` +
+      `<pre style="margin:0 0 8px;">${escapeHtml(jsonText)}</pre>` +
+      `<div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">` +
+        `<a href="${svUrl}" target="_blank" rel="noopener noreferrer">Open in Maps ↗</a>` +
+        `<button class="danger-ghost delete-point-btn" data-id="${p.id}" style="padding:4px 8px;">🗑️ 刪除</button>` +
+      `</div>` +
+    `</div>`;
+  }
+
+  function renderMarkers(points, isAppend){
+    if (!isAppend) {
+      clusterGroup.clearLayers();
+    }
+
+    const markers = points.map(p=>{
       const m = L.circleMarker([p.lat, p.lng], {
-        radius: 5,
+        radius: 6,
         color: markerColor(p.custom),
-        weight: 1,
+        weight: 1.5,
         fillColor: markerColor(p.custom),
         fillOpacity: 0.85
       });
-      const text = JSON.stringify(p.custom, null, 2);
-      m.bindPopup(`<pre style="margin:0;white-space:pre-wrap;">${escapeHtml(text)}</pre>`);
+
+      m.bindPopup(buildEmbedPopupHtml(p));
+      
+      m.off('click');
+
+      m.on('click', () => {
+        m.setPopupContent(buildEmbedPopupHtml(p));
+        m.openPopup();
+      });
+
+      m.on('contextmenu', (e) => {
+        if (e.originalEvent) {
+          e.originalEvent.preventDefault();
+          e.originalEvent.stopPropagation();
+        }
+        m.setPopupContent(buildInfoPopupHtml(p));
+        m.openPopup();
+      });
+
       m._searchText = JSON.stringify(p.raw).toLowerCase();
       p.marker = m;
       return m;
     });
+
     clusterGroup.addLayers(markers);
     
     setTimeout(() => {
       map.invalidateSize();
-      if (markers.length){
+      if (markers.length && !isAppend){
         const group = L.featureGroup(markers);
         map.fitBounds(group.getBounds().pad(0.15));
       }
@@ -805,64 +1143,107 @@
   function refreshMarkerColor(p){
     if (p.marker){
       p.marker.setStyle({color: markerColor(p.custom), fillColor: markerColor(p.custom)});
-      p.marker.setPopupContent(`<pre style="margin:0;white-space:pre-wrap;">${escapeHtml(JSON.stringify(p.custom, null, 2))}</pre>`);
+      p.marker.setPopupContent(buildEmbedPopupHtml(p));
     }
   }
 
-  // ============================================================
-  // JSON Processing Engine (Unified for URL & File Upload)
-  // ============================================================
-  function loadJsonContent(json, suggestedName, displaySource) {
-    showApp(displaySource);
+  function renderRawJsonDisplay() {
+    const dataArr = currentPoints.map(p => p.custom);
+    if (dataArr.length <= 30) {
+      rawJsonEl.textContent = JSON.stringify(dataArr, null, 2);
+      showMoreJsonBtn.style.display = "none";
+    } else {
+      const sliced = dataArr.slice(0, 30);
+      rawJsonEl.textContent = JSON.stringify(sliced, null, 2) + `\n\n... (And ${dataArr.length - 30} more entries. Click 'Show More' to view all)`;
+      showMoreJsonBtn.style.display = "block";
+    }
+  }
+
+  function openJsonModal(){
+    const dataArr = currentPoints.map(p => p.custom);
+    jsonModalContent.textContent = JSON.stringify(dataArr, null, 2);
+    jsonModal.style.display = "flex";
+  }
+
+  function closeJsonModal(){
+    jsonModal.style.display = "none";
+  }
+
+  showMoreJsonBtn.addEventListener("click", openJsonModal);
+  closeJsonModalBtn.addEventListener("click", closeJsonModal);
+  jsonModal.addEventListener("click", (e) => {
+    if (e.target === jsonModal) closeJsonModal();
+  });
+
+  function loadJsonContent(json, suggestedName, isAppend = false) {
+    showApp();
     hasFetchedOnce = true;
     formatBox.textContent = "";
-    rawJsonEl.textContent = "";
     
-    if (suggestedName) {
+    if (suggestedName && !isAppend) {
       mapNameInput.value = suggestedName.replace(/_original|_autofilled$/i, "");
     }
 
-    downloadOriginalBtn.disabled = true;
+    const rawPoints = extractPoints(json);
+    const newPoints = [];
+
+    if (!isAppend) {
+      seenCoords.clear();
+      currentPoints = [];
+      originalCustomCoords = [];
+    }
+
+    rawPoints.forEach(p => {
+      const key = p.lat.toFixed(6) + ',' + p.lng.toFixed(6);
+      if (!seenCoords.has(key)) {
+        seenCoords.add(key);
+        const custom = toCustomCoordinate(p);
+        newPoints.push({
+          id: Math.random().toString(36).substring(2, 15),
+          lat: p.lat, 
+          lng: p.lng, 
+          raw: p.raw, 
+          custom: custom
+        });
+      }
+    });
+
+    if (newPoints.length) {
+      currentPoints.push(...newPoints);
+      originalCustomCoords.push(...JSON.parse(JSON.stringify(newPoints.map(p => p.custom))));
+      renderMarkers(newPoints, isAppend);
+      setStatus(`Loaded ${currentPoints.length} total location(s)`, "ok");
+      downloadOriginalBtn.disabled = false;
+    } else if (!isAppend) {
+      clusterGroup.clearLayers();
+      setStatus(`No valid coordinates detected`, "err");
+      downloadOriginalBtn.disabled = true;
+    } else {
+      setStatus(`No new valid coordinates to add`, "err");
+    }
+
+    renderRawJsonDisplay();
+
     downloadAutoFilledBtn.disabled = true;
     downloadAutoFilledBtn.classList.remove("highlighted");
-
-    const rawPoints = extractPoints(json);
-    currentPoints = rawPoints.map(p => ({lat:p.lat, lng:p.lng, raw:p.raw, custom: toCustomCoordinate(p)}));
-
-    // Deep copy snapshot for Original export option
-    originalCustomCoords = JSON.parse(JSON.stringify(currentPoints.map(p => p.custom)));
-
-    formatBox.innerHTML = describeFormat(json, rawPoints);
-    rawJsonEl.textContent = JSON.stringify(json, null, 2).slice(0, 20000);
-
-    if (currentPoints.length){
-      renderMarkers();
-      setStatus(`Loaded · ${currentPoints.length} location(s)`, "ok");
-      downloadOriginalBtn.disabled = false;
-    } else {
-      clusterGroup.clearLayers();
-      setStatus(`No coordinates detected — inspect raw JSON`, "err");
-    }
   }
 
-  // ============================================================
-  // Fetch via URL
-  // ============================================================
-  async function doFetch(rawUrl){
+  async function doFetch(rawUrl, isAppend = false){
     const url = (rawUrl || "").trim();
     if (!url){
       setStatus("Please enter a URL", "err");
       return;
     }
-    showApp(url);
+    showApp();
     hasFetchedOnce = true;
     setStatus(`Fetching… ${url}`);
-    formatBox.textContent = "";
-    rawJsonEl.textContent = "";
 
-    downloadOriginalBtn.disabled = true;
-    downloadAutoFilledBtn.disabled = true;
-    downloadAutoFilledBtn.classList.remove("highlighted");
+    if (!isAppend) {
+      formatBox.textContent = "";
+      downloadOriginalBtn.disabled = true;
+      downloadAutoFilledBtn.disabled = true;
+      downloadAutoFilledBtn.classList.remove("highlighted");
+    }
 
     try{
       const res = await fetch(url, {method:"GET"});
@@ -871,31 +1252,34 @@
       try{
         json = JSON.parse(rawText);
       }catch(e){
-        rawJsonEl.textContent = rawText.slice(0, 20000);
-        formatBox.innerHTML = `<b style="color:var(--danger)">Response is not valid JSON</b> (HTTP ${res.status})`;
         setStatus(`HTTP ${res.status}, response was not JSON`, res.ok ? "ok" : "err");
-        clusterGroup.clearLayers();
-        currentPoints = [];
-        originalCustomCoords = [];
+        if (!isAppend) {
+          clusterGroup.clearLayers();
+          currentPoints = [];
+          originalCustomCoords = [];
+          seenCoords.clear();
+          rawJsonEl.textContent = rawText.slice(0, 5000);
+        }
         return;
       }
 
-      loadJsonContent(json, "", url);
+      loadJsonContent(json, "", isAppend);
     }catch(err){
-      formatBox.innerHTML = `<b style="color:var(--danger)">Request failed</b><br>${escapeHtml(String(err))}<br><br>Common cause: Target server doesn't allow CORS.`;
-      rawJsonEl.textContent = "(no data available)";
       setStatus("Request failed (possibly CORS or network issue)", "err");
-      currentPoints = [];
-      originalCustomCoords = [];
-      clusterGroup.clearLayers();
+      if (!isAppend) {
+        currentPoints = [];
+        originalCustomCoords = [];
+        seenCoords.clear();
+        clusterGroup.clearLayers();
+        rawJsonEl.textContent = "";
+      }
     }
   }
 
-  function showApp(url){
+  function showApp(){
     landing.style.display = "none";
     landingControls.style.display = "none";
     app.style.display = "flex";
-    appUrlInput.value = url;
     setTimeout(() => { map.invalidateSize(); }, 200);
   }
 
@@ -903,23 +1287,23 @@
     app.style.display = "none";
     landingControls.style.display = "flex";
     landing.style.display = "flex";
-    urlInput.value = appUrlInput.value;
+    urlInput.value = "";
     urlInput.focus();
   }
 
   landingForm.addEventListener("submit", e=>{
     e.preventDefault();
-    doFetch(urlInput.value);
+    doFetch(urlInput.value, false);
   });
-  refetchBtn.addEventListener("click", ()=> doFetch(appUrlInput.value));
+  
+  addUrlBtn.addEventListener("click", ()=> doFetch(appUrlInput.value, true));
+  
   appUrlInput.addEventListener("keydown", e=>{
-    if (e.key === "Enter") doFetch(appUrlInput.value);
+    if (e.key === "Enter") doFetch(appUrlInput.value, true);
   });
+  
   homeBtn.addEventListener("click", goHome);
 
-  // ============================================================
-  // Export Functions (Original vs Auto-Filled)
-  // ============================================================
   function downloadJsonFile(fileName, coordsData) {
     const payload = {
       name: fileName,
@@ -934,23 +1318,18 @@
     a.remove();
   }
 
-  // Option 1: Export Original JSON
   downloadOriginalBtn.addEventListener("click", ()=>{
     if (!originalCustomCoords.length) return;
     const baseName = mapNameInput.value.trim() || "map";
     downloadJsonFile(`${baseName}_original`, originalCustomCoords);
   });
 
-  // Option 2: Export Auto-Filled JSON
   downloadAutoFilledBtn.addEventListener("click", ()=>{
     if (!currentPoints.length) return;
     const baseName = mapNameInput.value.trim() || "map";
     downloadJsonFile(`${baseName}_autofilled`, currentPoints.map(p => p.custom));
   });
 
-  // ============================================================
-  // Search / filter markers
-  // ============================================================
   locSearch.addEventListener("input", ()=>{
     const q = locSearch.value.trim().toLowerCase();
     clusterGroup.eachLayer(m=>{
@@ -959,11 +1338,6 @@
     });
   });
 
-  // ============================================================
-  // Auto-fill missing panorama data
-  // Supports both Official Google StreetViewService (with API Key)
-  // and No-Key mode via GeoPhotoService (without API Key)
-  // ============================================================
   let sdkLoadPromise = null;
   function loadGoogleMapsSdk(key){
     if (window.google && window.google.maps && window.google.maps.StreetViewService) return Promise.resolve();
@@ -986,7 +1360,12 @@
         if (status === "OK" && data && data.location){
           let dateStr = null;
           if (data.imageDate) dateStr = data.imageDate;
-          resolve({panoId: data.location.pano, panoDate: dateStr});
+          resolve({
+            panoId: data.location.pano, 
+            panoDate: dateStr,
+            lat: data.location.latLng.lat(),
+            lng: data.location.latLng.lng()
+          });
         } else {
           resolve(null);
         }
@@ -1026,9 +1405,37 @@
           }
 
           if (matchPano && matchPano[1]) {
+            let snappedLat = lat;
+            let snappedLng = lng;
+
+            function findCloseCoord(node) {
+              if (!node) return null;
+              if (Array.isArray(node)) {
+                if (node.length >= 2 && typeof node[node.length-2] === 'number' && typeof node[node.length-1] === 'number') {
+                  let a = node[node.length-2];
+                  let b = node[node.length-1];
+                  if (Math.abs(a - lat) < 0.02 && Math.abs(b - lng) < 0.02) return {lat: a, lng: b};
+                  if (Math.abs(b - lat) < 0.02 && Math.abs(a - lng) < 0.02) return {lat: b, lng: a};
+                }
+                for (let i = 0; i < node.length; i++) {
+                  let res = findCloseCoord(node[i]);
+                  if (res) return res;
+                }
+              }
+              return null;
+            }
+
+            let coord = findCloseCoord(data);
+            if (coord) {
+              snappedLat = coord.lat;
+              snappedLng = coord.lng;
+            }
+
             resolve({
               panoId: matchPano[1],
-              panoDate: panoDate
+              panoDate: panoDate,
+              lat: snappedLat,
+              lng: snappedLng
             });
           } else {
             resolve(null);
@@ -1114,9 +1521,9 @@
     startAutoBtn.disabled = false;
     cancelAutoBtn.style.display = "none";
     autoProgressEl.textContent = autoCancelled ? "Auto-fill cancelled." : `Auto-fill complete. Found: ${foundCount}, Not found: ${missCount}`;
-    rawJsonEl.textContent = JSON.stringify({name: mapNameInput.value.trim() || "map", customCoordinates: currentPoints.map(p=>p.custom)}, null, 2).slice(0, 20000);
+    
+    renderRawJsonDisplay();
 
-    // Light up & enable Auto-Filled Export Button
     downloadAutoFilledBtn.disabled = false;
     downloadAutoFilledBtn.classList.add("highlighted");
   });
