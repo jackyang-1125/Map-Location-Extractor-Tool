@@ -87,4 +87,4 @@ Whether you're building custom maps for geography guessing games (like *WorldGue
 ### ⚠️ Technical Note & Disclaimer
 
 * **CORS Support:** The tool fetches directly from your browser; ensure target endpoints permit CORS requests.
-* **Independent Project:** This is an independent open-source technical helper tool and is not affiliated with or endorsed by Geoguessr or WorldGuessr.
+#### Whether you're a GIS researcher visualising public open-data layers, a web developer testing geospatial APIs, or managing custom coordinate datasets for location-based applications, this tool streamlines          your workflow in seconds.
