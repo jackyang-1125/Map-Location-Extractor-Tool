@@ -1,7 +1,3 @@
-以下是使用英文撰寫的簡明教學，教導使用者如何下載 `index.html` 並立即開始使用 **Map Location Extractor**：
-
----
-
 # 🚀 Quick Start Guide: Get Started in Seconds
 
 **Map Location Extractor** is a 100% client-side, single-file open-source tool. No complex backend setup, Node.js, or database installation is required—just download and run!
