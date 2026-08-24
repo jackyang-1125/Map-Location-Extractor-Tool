@@ -1,3 +1,33 @@
+以下是使用英文撰寫的簡明教學，教導使用者如何下載 `index.html` 並立即開始使用 **Map Location Extractor**：
+
+---
+
+# 🚀 Quick Start Guide: Get Started in Seconds
+
+**Map Location Extractor** is a 100% client-side, single-file open-source tool. No complex backend setup, Node.js, or database installation is required—just download and run!
+
+---
+
+## Step 1: Download `index.html`
+
+Save the source code file as **`index.html`** directly to your computer.
+
+## Step 2: Open in Your Browser
+
+Double-click the downloaded **`index.html`** file, or drag and drop it into any modern web browser (Chrome, Firefox, Edge, Safari).
+
+## Step 3: Start Extracting & Exploring
+
+1. **Paste URL:** In the landing page input box, paste any full URL that returns location JSON data (e.g., your API endpoint or exported map data).
+
+
+2. **Fetch:** Click the **Fetch** button to instantly load and parse coordinates.
+
+
+3. **Visualize & Auto-Fill:** View your locations on the interactive Leaflet map, use the sidebar search to filter markers, or check the **Auto-fill** option to retrieve missing Street View panorama IDs (`panoId`) and dates effortlessly.
+
+
+4. **Export:** Click **Download JSON** to save your clean, ready-to-use map dataset!
 # 🌍 Map Location Extractor
 
 > **Paste any URL returning location JSON data, instantly visualize markers on an interactive map, and auto-fill missing Street View data with zero backend hassle!**
