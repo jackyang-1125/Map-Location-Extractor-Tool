@@ -273,12 +273,13 @@
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.75);
+    background: rgba(0,0,0,0.82);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 9999;
     padding: 20px;
+    backdrop-filter: blur(3px);
   }
   .modal-content {
     background: var(--panel);
@@ -305,6 +306,15 @@
     overflow-y: auto;
     font-size: 12.5px;
     line-height: 1.6;
+  }
+  .modal-footer {
+    padding: 14px 18px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--panel-2);
+    border-radius: 0 0 10px 10px;
   }
 
   ::-webkit-scrollbar{width:9px;height:9px;}
@@ -441,17 +451,25 @@
     </div>
     <div class="modal-body">
       <p style="margin:0 0 10px;"><strong>1. Technical Nature & Non-Affiliation</strong><br>
-      <p>This application is strictly a technical demonstration and helper tool for parsing and visualizing public JSON map coordinates. <strong>It is NOT affiliated with, endorsed by, or connected to any specific online platforms, map applications, or third-party services.</strong></p>
-
+      This application is strictly a technical demonstration and helper tool for parsing and visualizing public JSON map coordinates. It is NOT affiliated with, endorsed by, or connected to any specific online platforms, map applications, or third-party services.</p>
 
       <p style="margin:0 0 10px;"><strong>2. Mandatory Permission & Copyright Compliance</strong><br>
-      Users <strong>MUST obtain express permission and consent from the original author/creator</strong> before fetching, extracting, downloading, or redistributing any map dataset. Unauthorized scraping or distribution of copyrighted material is strictly prohibited.</p>
+      Users MUST obtain express permission and consent from the original author/creator before fetching, extracting, downloading, or redistributing any map dataset. Unauthorized scraping or distribution of copyrighted material is strictly prohibited.</p>
 
       <p style="margin:0 0 10px;"><strong>3. Disclaimer of Liability (Hold Harmless)</strong><br>
       This software is provided "AS IS" for technical educational and testing purposes only. The user assumes full legal responsibility for any copyright infringement, breach of third-party service terms, or legal disputes arising from the use of this tool. The developer accepts no liability whatsoever.</p>
 
       <p style="margin:0;"><strong>4. Third-Party Endpoints Notice</strong><br>
       The No-Key panorama lookup function interacts with public network endpoints. Users acknowledge that third-party endpoints may change, enforce rate limits, or become unavailable at any time.</p>
+    </div>
+    
+    <!-- Mandatory Checkbox & Agreement Footer -->
+    <div class="modal-footer" id="termsFooter">
+      <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; cursor:pointer;">
+        <input type="checkbox" id="agreeCheckbox">
+        <span>I have read and agree to the <b>Terms of Use & Legal Disclaimer</b></span>
+      </label>
+      <button id="agreeTermsBtn" disabled style="width:100%; padding:10px;">Agree & Continue</button>
     </div>
   </div>
 </div>
@@ -499,16 +517,71 @@
   const landingTermsBtn = document.getElementById("landingTermsBtn");
   const appTermsBtn = document.getElementById("appTermsBtn");
   const closeTermsBtn = document.getElementById("closeTermsBtn");
+  const agreeCheckbox = document.getElementById("agreeCheckbox");
+  const agreeTermsBtn = document.getElementById("agreeTermsBtn");
 
   let hasFetchedOnce = false;
   let currentPoints = [];       // Points modified during auto-fill
   let originalCustomCoords = [];// Snapshot of original data before auto-fill
   let autoCancelled = false;
   let autoRunning = false;
+  let isMandatoryTermsMode = false;
 
   function setStatus(html, cls){
     statusEl.innerHTML = cls ? `<span class="${cls}">${html}</span>` : html;
   }
+
+  // ============================================================
+  // Mandatory First-Load Agreement Check
+  // ============================================================
+  const hasAgreedTerms = localStorage.getItem("termsAgreed") === "true";
+
+  function showTermsModal(mandatory = false) {
+    isMandatoryTermsMode = mandatory;
+    termsModal.style.display = "flex";
+
+    if (mandatory) {
+      closeTermsBtn.style.display = "none";
+      agreeCheckbox.checked = false;
+      agreeTermsBtn.disabled = true;
+    } else {
+      closeTermsBtn.style.display = "block";
+      agreeCheckbox.checked = true;
+      agreeTermsBtn.disabled = false;
+    }
+  }
+
+  function hideTermsModal() {
+    termsModal.style.display = "none";
+  }
+
+  // Trigger Mandatory Terms Modal on First Visit
+  if (!hasAgreedTerms) {
+    showTermsModal(true);
+  }
+
+  agreeCheckbox.addEventListener("change", () => {
+    agreeTermsBtn.disabled = !agreeCheckbox.checked;
+  });
+
+  agreeTermsBtn.addEventListener("click", () => {
+    if (agreeCheckbox.checked) {
+      localStorage.setItem("termsAgreed", "true");
+      hideTermsModal();
+    }
+  });
+
+  landingTermsBtn.addEventListener("click", () => showTermsModal(false));
+  appTermsBtn.addEventListener("click", () => showTermsModal(false));
+  closeTermsBtn.addEventListener("click", () => {
+    if (!isMandatoryTermsMode) hideTermsModal();
+  });
+
+  termsModal.addEventListener("click", (e) => {
+    if (e.target === termsModal && !isMandatoryTermsMode) {
+      hideTermsModal();
+    }
+  });
 
   // ============================================================
   // Auto-Fill Checkbox State Memory (localStorage)
@@ -546,19 +619,6 @@
     };
     reader.readAsText(file);
     fileInput.value = ""; // Reset for re-upload
-  });
-
-  // ============================================================
-  // Terms Modal Window Toggle
-  // ============================================================
-  function openTermsModal() { termsModal.style.display = "flex"; }
-  function closeTermsModal() { termsModal.style.display = "none"; }
-
-  landingTermsBtn.addEventListener("click", openTermsModal);
-  appTermsBtn.addEventListener("click", openTermsModal);
-  closeTermsBtn.addEventListener("click", closeTermsModal);
-  termsModal.addEventListener("click", (e) => {
-    if (e.target === termsModal) closeTermsModal();
   });
 
   // ============================================================
