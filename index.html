@@ -54,7 +54,84 @@
     padding:8px 14px;
     border-radius:6px;
     font-size:13px;
+    已為你移除 **Default zoom applied** 的設定輸入框與相應運算邏輯！
+
+### 🛠️ 變更內容：
+1. 刪除了側邊欄「自動補全」面板中的 `Default zoom applied` 數字輸入欄位。
+2. 刪除了 JavaScript 中在補全全景時覆寫 `zoom` 的相關邏輯，保留點位原始的 `heading` / `zoom` 欄位設定。
+
+---
+
+### 📄 完整更新程式碼（請直接儲存為 `.html` 檔案使用）
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Map Location Extractor Tool</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+<style>
+  :root{
+    /* Dark Theme Variables (Default) */
+    --bg:#0f1418;
+    --panel:#161d23;
+    --panel-2:#1d262d;
+    --line:#2a343c;
+    --text:#e7edf1;
+    --muted:#8fa0ab;
+    --accent:#3ec6c6;
+    --accent-2:#f2b134;
+    --danger:#e2685c;
+    --good:#5fd08a;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+
+  body.light-theme {
+    /* Light Theme Variables */
+    --bg:#f4f6f8;
+    --panel:#ffffff;
+    --panel-2:#f0f2f5;
+    --line:#d0d7de;
+    --text:#1f2328;
+    --muted:#57606a;
+    --accent:#008080;
+    --accent-2:#d97706;
+    --danger:#cf222e;
+    --good:#1a7f37;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display:flex;
+    flex-direction:column;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  button{
+    background:var(--accent);
+    color:#08262a;
+    border:none;
+    padding:8px 14px;
+    border-radius:6px;
+    font-size:13px;
     font-weight:600;
+    cursor:pointer;
+    transition: filter 0.2s, background-color 0.2s, box-shadow 0.2s;
+  }
+  body.light-theme button { color: #ffffff; }
+  button:hover{filter:brightness(1.08);}
+  button:disabled{opacity:.4;cursor:default;filter:grayscale(0.6);}
+  
+  /* Highlighted button effect when auto-fill finishes */
+  button.highlighted {
+    background: var(--good) !important;font-weight:600;
     cursor:pointer;
     transition: filter 0.2s, background-color 0.2s, box-shadow 0.2s;
   }
@@ -206,7 +283,153 @@
     overflow-y:auto;
   }
   .panel{
+    padding:12px 1
+    color: #08262a !important;
+    box-shadow: 0 0 12px rgba(95, 208, 138, 0.6);
+    animation: pulse 1.5s infinite alternate;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 5px rgba(95, 208, 138, 0.4); }
+    100% { box-shadow: 0 0 16px rgba(95, 208, 138, 0.95); }
+  }
+
+  button.secondary{
+    background:transparent;
+    color:var(--text);
+    border:1px solid var(--line);
+  }
+  button.secondary:hover{border-color:var(--accent);}
+  button.ghost{
+    background:transparent;
+    color:var(--accent);
+    border:1px solid var(--accent);
+  }
+  button.ghost:hover{background:var(--accent); color:#08262a;}
+  input[type="text"], input[type="password"], input[type="number"]{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:8px 10px;
+    border-radius:6px;
+    font-size:13px;
+    outline:none;
+    font-family:inherit;
+  }
+  input:focus{border-color:var(--accent);}
+
+  /* ---------- Top Bar Controls ---------- */
+  .top-right-controls {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+  }
+
+  /* ---------- Landing ---------- */
+  #landing{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    text-align:center;
+    gap:14px;
+  }
+  #landing h1{
+    font-size:22px;
+    margin:0;
+    color:var(--accent);
+    letter-spacing:.02em;
+  }
+  #landing p.sub{
+    color:var(--muted);
+    font-size:13px;
+    margin:0 0 6px;
+    max-width:520px;
+    line-height:1.6;
+  }
+  #landingForm{
+    display:flex;
+    gap:8px;
+    width:100%;
+    max-width:640px;
+  }
+  #urlInput{
+    flex:1;
+    font-size:14px;
     padding:12px 14px;
+  }
+  #landingForm button{padding:12px 20px; font-size:14px;}
+  #landingExample{
+    font-size:11.5px;
+    color:var(--muted);
+    font-family:var(--mono);
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:8px 12px;
+    max-width:640px;
+    word-break:break-all;
+  }
+  .credit-tag{
+    margin-top:20px;
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.05em;
+  }
+
+  /* ---------- App shell ---------- */
+  #app{
+    flex:1;
+    display:none;
+    flex-direction:column;
+    min-height:0;
+  }
+  header{
+    padding:10px 16px;
+    background:var(--panel);
+    border-bottom:1px solid var(--line);
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+  }
+  header #appUrlInput{width:340px; max-width:38vw; font-family:var(--mono); font-size:12px;}
+  #status{
+    font-size:12px;
+    color:var(--muted);
+    margin-left:auto;
+    text-align:right;
+    line-height:1.4;
+    max-width:280px;
+  }
+  #status .err{color:var(--danger);}
+  #status .ok{color:var(--good);}
+  main{
+    flex:1;
+    display:flex;
+    min-height:0;
+  }
+  #map{flex:1; background:#0a0d10; min-height:300px;}
+  #sidebar{
+    width:420px;
+    max-width:44vw;
+    border-left:1px solid var(--line);
+    background:var(--panel);
+    display:flex;
+    flex-direction:column;
+    min-width:320px;
+    overflow-y:auto;
+  }
+  .panel{
+    padding:12px 14px;
+    border-bottom:1px solid var(--line);
+  }
+  .panel h2{
+    font-size:11.4px;
     border-bottom:1px solid var(--line);
   }
   .panel h2{
@@ -223,7 +446,105 @@
   .row label{font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; cursor:pointer;}
   #mapNameInput{flex:1; min-width:0;}
   #apiKeyInput{width:100%;}
-  #zoomDefaultInput{width:110px;}
+  #autoPanel{display:none;}
+  #autoProgress{font-size:11.5px; color:var(--muted); margin-top:8px; line-height:1.5;}
+  .barOuter{
+    height:6px;
+    background:var(--panel-2);
+    border-radius:4px;
+    overflow:hidden;
+    margin-top:6px;
+  }
+  .barInner{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+  #rawJson{
+    margin:0;
+    padding:0;
+    font-family:var(--mono);
+    font-size:11.5px;
+    line-height:1.5;
+    color:var(--text);
+    white-space:pre;
+    max-height:320px;
+    overflow:auto;
+  }
+  #locSearch{width:100%;}
+  #hint{
+    font-size:11.3px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+  #hint code{color:var(--text);}
+  .legend{display:flex; gap:14px; font-size:11.5px; color:var(--muted); margin-top:6px;}
+  .legend span{display:inline-flex; align-items:center; gap:5px;}
+  .dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+  .leaflet-popup-content{font-family:var(--mono); font-size:11.5px;}
+
+  /* ---------- Modal Terms Window ---------- */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+  }
+  .modal-content {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    max-width: 620px;
+    width: 100%;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  }
+  .modal-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-header h3 { margin: 0; font-size: 15px; color: var(--accent-2); }
+  .modal-body {
+    padding: 18px;
+    overflow-y: auto;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;}
+</style>
+</head>
+<body>
+
+<!-- Landing Top Right Controls -->
+<div class="top-right-controls" id="landingControls">
+  <button id="themeToggleLanding" class="ghost theme-btn">🌙 Dark Mode</button>
+  <button id="landingTermsBtn" class="secondary">Terms of Use</button>
+</div>
+
+<!-- Landing Screen -->
+<div id="landing">
+  <h1>🌍 Map Location Extractor</h1>
+  <p class="sub">Paste any URL returning location JSON data (any length, any format). Fetch and view markers on an interactive map, search, export to JSON, and optionally auto-fill missing panorama data.</p5px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--muted);
+    margin:0 0 8px;
+  }
+  #formatBox{font-size:12px; color:var(--muted);}
+  #formatBox b{color:var(--accent-2);}
+  .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;}
+  .row:first-child{margin-top:0;}
+  .row label{font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; cursor:pointer;}
+  #mapNameInput{flex:1; min-width:0;}
+  #apiKeyInput{width:100%;}
   #autoPanel{display:none;}
   #autoProgress{font-size:11.5px; color:var(--muted); margin-top:8px; line-height:1.5;}
   .barOuter{
@@ -313,6 +634,9 @@
   <p class="sub">Paste any URL returning location JSON data (any length, any format). Fetch and view markers on an interactive map, search, export to JSON, and optionally auto-fill missing panorama data.</p>
   <form id="landingForm">
     <input type="text" id="urlInput" placeholder="Paste a full URL, e.g. https://example.com/api/map-data" autocomplete="off" spellcheck="false">
+    <button type>
+  <form id="landingForm">
+    <input type="text" id="urlInput" placeholder="Paste a full URL, e.g. https://example.com/api/map-data" autocomplete="off" spellcheck="false">
     <button type="submit" id="goBtn">Fetch</button>
   </form>
   <div id="landingExample">https://example.com/api/map-data</div>
@@ -374,11 +698,113 @@
           </div>
 
           <div class="row" style="margin-top:10px;">
-            <label style="gap:6px;"><span>Default zoom applied:</span>
-              <input type="number" id="zoomDefaultInput" step="0.0001" value="0.16992500144231237">
-            </label>
+            <button id="startAutoBtn">Start Auto-Fill</button>
+            <button class="secondary" id="cancelAutoBtn" style="display:none;">Cancel</button>
           </div>
-          <div class="row">
+          <div id="autoProgress"></div>
+          <div class="barOuter"><div class="barInner" id="autoBar"></div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Search Map Markers</h2>
+        <input type="text" id="locSearch" placeholder="Type text to filter markers...">
+      </div>
+
+      <div class="panel" style="flex:1;">
+        <h2>Raw JSON</h2>
+        <pre id="rawJson">(no data yet)</pre>
+      </div>
+
+      <div class="panel" id="hintPanel">
+        <div id="hint">
+          Note: This tool fetches directly from your browser to the URL you paste. If the target server does not enable CORS, the request may fail.
+        </div>
+      </div>
+
+      <div class="panel" style="text-align:center; color:var(--muted); font-size:11px;">
+        v0.1 · Human Prompted, AI Crafted
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal Dialog for Terms of Use -->
+<div id="termsModal" class="modal-overlay" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>⚠️ Terms of Use & Legal Disclaimer</h3>
+      <button id="closeTermsBtn" class="secondary">✕ Close</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin:0 0 10px;"><strong>1. Technical Nature & Non-Affiliation</strong><br>
+      This application is strictly a technical demonstration and helper tool for parsing and visualizing public JSON map coordinates. <strong>It is NOT affiliated with, endorsed by, or connected to WorldGuessr, Geoguessr, or any specific map gaming platform.</strong></p>
+
+      <p style="margin:0 0 10px;"><strong>2. Mandatory Permission & Copyright Compliance</strong><br>
+      Users <strong>MUST obtain express permission and consent from the original author/creator</strong> before fetching, extracting, downloading, or redistributing any map dataset. Unauthorized scraping or distribution of copyrighted material is strictly prohibited.</p>
+
+      <p style="margin:0 0="submit" id="goBtn">Fetch</button>
+  </form>
+  <div id="landingExample">https://example.com/api/map-data</div>
+  <div class="credit-tag">v0.1 · Human Prompted, AI Crafted</div>
+</div>
+
+<!-- Main App Shell -->
+<div id="app">
+  <header>
+    <input type="text" id="appUrlInput" autocomplete="off" spellcheck="false">
+    <button id="refetchBtn">Refetch</button>
+    <button class="secondary" id="backBtn">← New Query</button>
+    <button id="themeToggleApp" class="ghost theme-btn" style="margin-left:8px;">🌙 Dark Mode</button>
+    <button id="appTermsBtn" class="secondary" style="margin-left:4px;">Terms of Use</button>
+    <div id="status">No query yet</div>
+  </header>
+
+  <main>
+    <div id="map"></div>
+    <div id="sidebar">
+
+      <div class="panel">
+        <h2>Response Format Detection</h2>
+        <div id="formatBox"></div>
+      </div>
+
+      <!-- Export Panel with Dual Options -->
+      <div class="panel">
+        <h2>Export Map JSON</h2>
+        <div class="row">
+          <input type="text" id="mapNameInput" placeholder="Map name (e.g. my-map)">
+        </div>
+        <div class="row" style="margin-top:10px; gap:8px;">
+          <button id="downloadOriginalBtn" class="secondary" disabled style="flex:1;">Export Original JSON</button>
+          <button id="downloadAutoFilledBtn" disabled style="flex:1;">Export Auto-Filled JSON</button>
+        </div>
+        <div class="legend" style="margin-top:10px;">
+          <span><span class="dot" style="background:var(--good)"></span><span>Has Panorama Data</span></span>
+          <span><span class="dot" style="background:var(--danger)"></span><span>Missing Panorama Data</span></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="row">
+          <label><input type="checkbox" id="autoCheckbox"><span>Auto-fill missing location data (panoId / capture date)</span></label>
+        </div>
+        <div id="autoPanel">
+          <div class="row" style="margin-top:10px;">
+            <button type="button" class="secondary" id="advancedToggleBtn">Advanced Options ▼</button>
+          </div>
+          
+          <div id="advancedBox" style="display:none; margin-top:8px; padding:10px; background:var(--panel-2); border-radius:6px; border:1px solid var(--line);">
+            <div class="row">
+              <input type="password" id="apiKeyInput" placeholder="Paste Google Maps API Key (Optional)">
+            </div>
+            <div class="row">
+              <span style="font-size:11px; color:var(--muted);">By default, No-Key mode is used. Enter an API key only if you prefer using official Google Maps SDK quota.</span>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
             <button id="startAutoBtn">Start Auto-Fill</button>
             <button class="secondary" id="cancelAutoBtn" style="display:none;">Cancel</button>
           </div>
@@ -429,6 +855,10 @@
       This software is provided "AS IS" for technical educational and testing purposes only. The user assumes full legal responsibility for any copyright infringement, breach of third-party service terms, or legal disputes arising from the use of this tool. The developer accepts no liability whatsoever.</p>
 
       <p style="margin:0;"><strong>4. Third-Party Endpoints Notice</strong><br>
+      The No-Key panorama lookup function interacts with public network endpoints. Users acknowledge that third-party endpoints may change, enforce rate limits, or become unavailable 10px;"><strong>3. Disclaimer of Liability (Hold Harmless)</strong><br>
+      This software is provided "AS IS" for technical educational and testing purposes only. The user assumes full legal responsibility for any copyright infringement, breach of third-party service terms, or legal disputes arising from the use of this tool. The developer accepts no liability whatsoever.</p>
+
+      <p style="margin:0;"><strong>4. Third-Party Endpoints Notice</strong><br>
       The No-Key panorama lookup function interacts with public network endpoints. Users acknowledge that third-party endpoints may change, enforce rate limits, or become unavailable at any time.</p>
     </div>
   </div>
@@ -462,7 +892,55 @@
   const advancedToggleBtn = document.getElementById("advancedToggleBtn");
   const advancedBox = document.getElementById("advancedBox");
   const apiKeyInput = document.getElementById("apiKeyInput");
-  const zoomDefaultInput = document.getElementById("zoomDefaultInput");
+  const startAutoBtn = document.getElementById("startAutoBtn");
+  const cancelAutoBtn = document.getElementById("cancelAutoBtn");
+  const autoProgressEl = document.getElementById("autoProgress");
+  const autoBar = document.getElementById("autoBar");
+  const locSearch = document.getElementById("locSearch");
+
+  // Modal Refs
+  const termsModal = document.getElementById("termsModal");
+  const landingTermsBtn = document.getElementById("landingTermsBtn");
+  const appTermsBtn = document.getElementById("appTermsBtn");
+  const closeTermsBtn = document.getElementById("closeTermsBtn");
+
+  let hasFetchedOnce = false;
+  let currentPoints = [];       // Points modified during auto-fill
+  let originalCustomCoords = [];// Snapshot of original data before auto-fill
+  let autoCancelled = false;
+  let autoRunning = at any time.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // ============================================================
+  // DOM refs
+  // ============================================================
+  const landing = document.getElementById("landing");
+  const landingControls = document.getElementById("landingControls");
+  const app = document.getElementById("app");
+  const landingForm = document.getElementById("landingForm");
+  const urlInput = document.getElementById("urlInput");
+  const appUrlInput = document.getElementById("appUrlInput");
+  const refetchBtn = document.getElementById("refetchBtn");
+  const backBtn = document.getElementById("backBtn");
+  const statusEl = document.getElementById("status");
+  const formatBox = document.getElementById("formatBox");
+  const rawJsonEl = document.getElementById("rawJson");
+  const mapNameInput = document.getElementById("mapNameInput");
+  const downloadOriginalBtn = document.getElementById("downloadOriginalBtn");
+  const downloadAutoFilledBtn = document.getElementById("downloadAutoFilledBtn");
+  const autoCheckbox = document.getElementById("autoCheckbox");
+  const autoPanel = document.getElementById("autoPanel");
+  const advancedToggleBtn = document.getElementById("advancedToggleBtn");
+  const advancedBox = document.getElementById("advancedBox");
+  const apiKeyInput = document.getElementById("apiKeyInput");
   const startAutoBtn = document.getElementById("startAutoBtn");
   const cancelAutoBtn = document.getElementById("cancelAutoBtn");
   const autoProgressEl = document.getElementById("autoProgress");
@@ -480,6 +958,12 @@
   let originalCustomCoords = [];// Snapshot of original data before auto-fill
   let autoCancelled = false;
   let autoRunning = false;
+
+  function setStatus(html, cls){
+    statusEl.innerHTML = cls ? `<span class="${cls}">${html}</span>` : html;
+  }
+
+  // false;
 
   function setStatus(html, cls){
     statusEl.innerHTML = cls ? `<span class="${cls}">${html}</span>` : html;
@@ -562,7 +1046,79 @@
 
   // ============================================================
   // Flexible coordinate extraction from arbitrary JSON
+  // = ============================================================
+  // Auto-Fill Checkbox State Memory (localStorage)
+  // Default to Checked / Open unless explicitly unchecked
   // ============================================================
+  const savedAutoCheck = localStorage.getItem("autoFillChecked");
+  const isAutoChecked = savedAutoCheck === null ? true : (savedAutoCheck === "true");
+  autoCheckbox.checked = isAutoChecked;
+  autoPanel.style.display = isAutoChecked ? "block" : "none";
+
+  autoCheckbox.addEventListener("change", () => {
+    autoPanel.style.display = autoCheckbox.checked ? "block" : "none";
+    localStorage.setItem("autoFillChecked", autoCheckbox.checked);
+  });
+
+  // ============================================================
+  // Terms Modal Window Toggle
+  // ============================================================
+  function openTermsModal() { termsModal.style.display = "flex"; }
+  function closeTermsModal() { termsModal.style.display = "none"; }
+
+  landingTermsBtn.addEventListener("click", openTermsModal);
+  appTermsBtn.addEventListener("click", openTermsModal);
+  closeTermsBtn.addEventListener("click", closeTermsModal);
+  termsModal.addEventListener("click", (e) => {
+    if (e.target === termsModal) closeTermsModal();
+  });
+
+  // ============================================================
+  // Theme Switching Logic (Light / Dark Mode + TileLayer)
+  // ============================================================
+  let currentTheme = 'dark';
+  const darkTileLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+    subdomains: "abcd", maxZoom: 19
+  });
+  const lightTileLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+    attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+    subdomains: "abcd", maxZoom: 19
+  });
+
+  const map = L.map("map", {worldCopyJump:true}).setView([20,0], 2);
+  darkTileLayer.addTo(map);
+
+  let clusterGroup = L.markerClusterGroup({chunkedLoading:true, maxClusterRadius:45});
+  map.addLayer(clusterGroup);
+
+  function toggleTheme() {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    const themeBtns = document.querySelectorAll('.theme-btn');
+
+    if (currentTheme === 'light') {
+      document.body.classList.add('light-theme');
+      map.removeLayer(darkTileLayer);
+      map.addLayer(lightTileLayer);
+      themeBtns.forEach(btn => btn.textContent = '☀️ Light Mode');
+    } else {
+      document.body.classList.remove('light-theme');
+      map.removeLayer(lightTileLayer);
+      map.addLayer(darkTileLayer);
+      themeBtns.forEach(btn => btn.textContent = '🌙 Dark Mode');
+    }
+  }
+
+  document.getElementById("themeToggleLanding").addEventListener("click", toggleTheme);
+  document.getElementById("themeToggleApp").addEventListener("click", toggleTheme);
+
+  // ============================================================
+  // Advanced Options Toggle
+  // ============================================================
+  advancedToggleBtn.addEventListener("click", () => {
+    const isHidden = advancedBox.style.display === "none";
+    advancedBox.style.display = isHidden ? "block" : "none";
+    advancedToggleBtn.textContent = is===========================================================
   function extractPoints(json){
     const found = [];
 
@@ -629,7 +1185,71 @@
       stateCode: raw.stateCode ?? null
     };
     if (raw.extra && typeof raw.extra === "object"){
-      entry.extra = Object.assign({}, raw.extra);
+      Hidden ? "Advanced Options ▲" : "Advanced Options ▼";
+  });
+
+  // ============================================================
+  // Flexible coordinate extraction from arbitrary JSON
+  // ============================================================
+  function extractPoints(json){
+    const found = [];
+
+    function coordFromObj(o){
+      if (o == null) return null;
+      if (Array.isArray(o) && o.length >= 2 && typeof o[0] === "number" && typeof o[1] === "number"){
+        let a = o[0], b = o[1];
+        if (Math.abs(a) > 90 && Math.abs(b) <= 90) return {lat:b, lng:a};
+        return {lat:a, lng:b};
+      }
+      if (typeof o === "object"){
+        const lat = o.lat ?? o.latitude ?? o.Lat ?? o.y;
+        const lng = o.lng ?? o.lon ?? o.long ?? o.longitude ?? o.Lng ?? o.x;
+        if (typeof lat === "number" && typeof lng === "number") return {lat, lng};
+      }
+      return null;
+    }
+
+    function walk(node, depth){
+      if (depth > 5 || node == null) return;
+      if (Array.isArray(node)){
+        let hits = 0;
+        for (const el of node) if (coordFromObj(el)) hits++;
+        if (hits > 0 && hits >= node.length * 0.5){
+          for (const el of node){
+            const c = coordFromObj(el);
+            if (c) found.push({lat:c.lat, lng:c.lng, raw:el});
+          }
+          return;
+        }
+        for (const el of node) walk(el, depth+1);
+        return;
+      }
+      if (typeof node === "object"){
+        const c = coordFromObj(node);
+        if (c && Object.keys(node).length <= 8){
+          found.push({lat:c.lat, lng:c.lng, raw:node});
+        }
+        for (const key of Object.keys(node)) walk(node[key], depth+1);
+      }
+    }
+
+    walk(json, 0);
+
+    const seen = new Set();
+    return found.filter(p=>{
+      const key = JSON.stringify(p.raw);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function toCustomCoordinate(p){
+    const raw = (p.raw && typeof p.raw === "object" && !Array.isArray(p.raw)) ? p.raw : {};
+    const entry = {
+      lat: p.lat,
+      lng: p.lng,
+      heading: typeof raw.heading === "number" ?entry.extra = Object.assign({}, raw.extra);
     }
     return entry;
   }
@@ -702,7 +1322,71 @@
 
   // ============================================================
   // Fetch
-  // ============================================================
+ raw.heading : 0.001,
+      pitch: typeof raw.pitch === "number" ? raw.pitch : 0,
+      zoom: typeof raw.zoom === "number" ? raw.zoom : 0,
+      panoId: raw.panoId ?? null,
+      countryCode: raw.countryCode ?? null,
+      stateCode: raw.stateCode ?? null
+    };
+    if (raw.extra && typeof raw.extra === "object"){
+      entry.extra = Object.assign({}, raw.extra);
+    }
+    return entry;
+  }
+
+  function hasPano(custom){
+    return !!(custom.extra && custom.extra.panoId);
+  }
+
+  function describeFormat(json, points){
+    let topType;
+    if (Array.isArray(json)) topType = `Array (length ${json.length})`;
+    else if (typeof json === "object") topType = `Object (keys: ${Object.keys(json).join(", ")})`;
+    else topType = typeof json;
+
+    let sampleKeys = "";
+    if (points.length){
+      const raw = points[0].raw;
+      if (raw && typeof raw === "object" && !Array.isArray(raw)) sampleKeys = Object.keys(raw).join(", ");
+      else if (Array.isArray(raw)) sampleKeys = "[number, number] form";
+    }
+
+    return `
+      <div>Top-level type: <b>${topType}</b></div>
+      <div style="margin-top:6px;">Coordinates detected: <b>${points.length}</b></div>
+      ${sampleKeys ? `<div style="margin-top:6px;">Sample object fields: <b>${sampleKeys}</b></div>` : ""}
+    `;
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  function markerColor(custom){
+    return hasPano(custom) ? "#5fd08a" : "#e2685c";
+  }
+
+  function renderMarkers(){
+    clusterGroup.clearLayers();
+    const markers = currentPoints.map(p=>{
+      const m = L.circleMarker([p.lat, p.lng], {
+        radius: 5,
+        color: markerColor(p.custom),
+        weight: 1,
+        fillColor: markerColor(p.custom),
+        fillOpacity: 0.85
+      });
+      const text = JSON.stringify(p.custom, null, 2);
+      m.bindPopup(`<pre style="margin:0;white-space:pre-wrap;">${escapeHtml(text)}</pre>`);
+      m._searchText = JSON.stringify(p.raw).toLowerCase();
+      p.marker = m;
+      return m;
+    });
+    clusterGroup.addLayers(markers);
+    
+    setTimeout(() => {
+      map.  // ============================================================
   async function doFetch(rawUrl){
     const url = (rawUrl || "").trim();
     if (!url){
@@ -756,7 +1440,66 @@
         setStatus(`HTTP ${res.status} · no coordinates detected — inspect raw JSON`, "err");
       }
     }catch(err){
-      formatBox.innerHTML = `<b style="color:var(--danger)">Request failed</b><br>${escapeHtml(String(err))}<br><br>Common cause: Target server doesn't allow CORS.`;
+      formatinvalidateSize();
+      if (markers.length){
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.15));
+      }
+    }, 150);
+  }
+
+  function refreshMarkerColor(p){
+    if (p.marker){
+      p.marker.setStyle({color: markerColor(p.custom), fillColor: markerColor(p.custom)});
+      p.marker.setPopupContent(`<pre style="margin:0;white-space:pre-wrap;">${escapeHtml(JSON.stringify(p.custom, null, 2))}</pre>`);
+    }
+  }
+
+  // ============================================================
+  // Fetch
+  // ============================================================
+  async function doFetch(rawUrl){
+    const url = (rawUrl || "").trim();
+    if (!url){
+      setStatus("Please enter a URL", "err");
+      return;
+    }
+    showApp(url);
+    hasFetchedOnce = true;
+    setStatus(`Fetching… ${url}`);
+    formatBox.textContent = "";
+    rawJsonEl.textContent = "";
+    
+    // Enable Original Export immediately
+    downloadOriginalBtn.disabled = true;
+    
+    // Keep Auto-Filled Export DISABLED until "Start Auto-Fill" is clicked and finishes!
+    downloadAutoFilledBtn.disabled = true;
+    downloadAutoFilledBtn.classList.remove("highlighted");
+
+    try{
+      const res = await fetch(url, {method:"GET"});
+      const rawText = await res.text();
+      let json;
+      try{
+        json = JSON.parse(rawText);
+      }catch(e){
+        rawJsonEl.textContent = rawText.slice(0, 20000);
+        formatBox.innerHTML = `<b style="color:var(--danger)">Response is not valid JSON</b> (HTTP ${res.status})`;
+        setStatus(`HTTP ${res.status}, response was not JSON`, res.ok ? "ok" : "err");
+        clusterGroup.clearLayers();
+        currentPoints = [];
+        originalCustomCoords = [];
+        return;
+      }
+
+      const rawPoints = extractPoints(json);
+      currentPoints = rawPoints.map(p => ({lat:p.lat, lng:p.lng, raw:p.raw, custom: toCustomCoordinate(p)}));
+
+      // Deep copy snapshot for Original export option
+      originalCustomCoords = JSON.parse(JSON.stringify(currentPoints.map(p => p.custom)));
+
+Box.innerHTML = `<b style="color:var(--danger)">Request failed</b><br>${escapeHtml(String(err))}<br><br>Common cause: Target server doesn't allow CORS.`;
       rawJsonEl.textContent = "(no data available)";
       setStatus("Request failed (possibly CORS or network issue)", "err");
       currentPoints = [];
@@ -823,7 +1566,65 @@
   // ============================================================
   // Search / filter markers
   // ============================================================
-  locSearch.addEventListener("input", ()=>{
+  loc      formatBox.innerHTML = describeFormat(json, rawPoints);
+      rawJsonEl.textContent = JSON.stringify(json, null, 2).slice(0, 20000);
+
+      if (currentPoints.length){
+        renderMarkers();
+        setStatus(`HTTP ${res.status} · ${currentPoints.length} location(s)`, "ok");
+        downloadOriginalBtn.disabled = false;
+      } else {
+        clusterGroup.clearLayers();
+        setStatus(`HTTP ${res.status} · no coordinates detected — inspect raw JSON`, "err");
+      }
+    }catch(err){
+      formatBox.innerHTML = `<b style="color:var(--danger)">Request failed</b><br>${escapeHtml(String(err))}<br><br>Common cause: Target server doesn't allow CORS.`;
+      rawJsonEl.textContent = "(no data available)";
+      setStatus("Request failed (possibly CORS or network issue)", "err");
+      currentPoints = [];
+      originalCustomCoords = [];
+      clusterGroup.clearLayers();
+    }
+  }
+
+  function showApp(url){
+    landing.style.display = "none";
+    landingControls.style.display = "none";
+    app.style.display = "flex";
+    appUrlInput.value = url;
+    setTimeout(() => { map.invalidateSize(); }, 200);
+  }
+
+  landingForm.addEventListener("submit", e=>{
+    e.preventDefault();
+    doFetch(urlInput.value);
+  });
+  refetchBtn.addEventListener("click", ()=> doFetch(appUrlInput.value));
+  appUrlInput.addEventListener("keydown", e=>{
+    if (e.key === "Enter") doFetch(appUrlInput.value);
+  });
+  backBtn.addEventListener("click", ()=>{
+    app.style.display = "none";
+    landingControls.style.display = "flex";
+    landing.style.display = "flex";
+    urlInput.value = appUrlInput.value;
+    urlInput.focus();
+  });
+
+  // ============================================================
+  // Export Functions (Original vs Auto-Filled)
+  // ============================================================
+  function downloadJsonFile(fileName, coordsData) {
+    const payload = {
+      name: fileName,
+      customCoordinates: coordsData
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 0)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${fileName}.json`;
+    document.body.appendChild(a);
+    Search.addEventListener("input", ()=>{
     const q = locSearch.value.trim().toLowerCase();
     clusterGroup.eachLayer(m=>{
       const match = !q || (m._searchText && m._searchText.includes(q));
@@ -841,7 +1642,40 @@
     if (window.google && window.google.maps && window.google.maps.StreetViewService) return Promise.resolve();
     if (sdkLoadPromise) return sdkLoadPromise;
     sdkLoadPromise = new Promise((resolve, reject)=>{
-      const cbName = "__gmapsCb_" + Date.now();
+      const cbName = "__gmapsCb_" + Date.nowa.click();
+    a.remove();
+  }
+
+  // Option 1: Export Original JSON
+  downloadOriginalBtn.addEventListener("click", ()=>{
+    if (!originalCustomCoords.length) return;
+    const baseName = mapNameInput.value.trim() || "map";
+    downloadJsonFile(`${baseName}_original`, originalCustomCoords);
+  });
+
+  // Option 2: Export Auto-Filled JSON
+  downloadAutoFilledBtn.addEventListener("click", ()=>{
+    if (!currentPoints.length) return;
+    const baseName = mapNameInput.value.trim() || "map";
+    downloadJsonFile(`${baseName}_autofilled`, currentPoints.map(p => p.custom));
+  });
+
+  // ============================================================
+  // Search / filter markers
+  // ============================================================
+  locSearch.addEventListener("input", ()=>{
+    const q = locSearch.value.trim().toLowerCase();
+    clusterGroup.eachLayer(m=>{
+      const match = !q || (m._searchText && m._searchText.includes(q));
+      m.setStyle({fillOpacity: match ? 0.85 : 0.08, opacity: match ? 1 : 0.08});
+    });
+  });
+
+  // ============================================================
+  // Auto-fill missing panorama data
+  // Supports both Official Google StreetViewService (with API Key)
+  // and No-Key mode via GeoPhotoService (without API Key)
+  // =================();
       window[cbName] = ()=>{ delete window[cbName]; resolve(); };
       const s = document.createElement("script");
       s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&callback=${cbName}`;
@@ -893,7 +1727,56 @@
           } else {
             const dateArrMatch = str.match(/\[(20\d{2}),\s*([1-9]|1[02])\]/);
             if (dateArrMatch) {
-              panoDate = `${dateArrMatch[1]}-${dateArrMatch[2].padStart(2, '0')}`;
+              panoDate = `${dateArrMatch[1]}-${dateArrMatch===========================================
+  let sdkLoadPromise = null;
+  function loadGoogleMapsSdk(key){
+    if (window.google && window.google.maps && window.google.maps.StreetViewService) return Promise.resolve();
+    if (sdkLoadPromise) return sdkLoadPromise;
+    sdkLoadPromise = new Promise((resolve, reject)=>{
+      const cbName = "__gmapsCb_" + Date.now();
+      window[cbName] = ()=>{ delete window[cbName]; resolve(); };
+      const s = document.createElement("script");
+      s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&callback=${cbName}`;
+      s.async = true;
+      s.onerror = ()=> reject(new Error("Script load error"));
+      document.head.appendChild(s);
+    });
+    return sdkLoadPromise;
+  }
+
+  function getPanoramaWithKey(svc, lat, lng){
+    return new Promise(resolve=>{
+      svc.getPanorama({location:{lat, lng}, radius:100, preference:"nearest"}, (data, status)=>{
+        if (status === "OK" && data && data.location){
+          let dateStr = null;
+          if (data.imageDate) dateStr = data.imageDate;
+          resolve({panoId: data.location.pano, panoDate: dateStr});
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  function getPanoramaNoKey(lat, lng){
+    return new Promise(resolve=>{
+      const cbName = '__gmaps_pano_cb_' + Math.random().toString(36).substring(2, 9);
+      let timer = setTimeout(() => {
+        cleanup();
+        resolve(null);
+      }, 4000);
+
+      function cleanup() {
+        clearTimeout(timer);
+        delete window[cbName];
+        if (script && script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      window[cbName] = function(data) {
+        cleanup();
+        try {
+          const str = JSON.stringify(data);
+          const matchPano = str.match(/"([a-zA-Z0-9_-]{22}|CAoS[a-zA-Z0-9_-]+[2].padStart(2, '0')}`;
             }
           }
 
@@ -916,6 +1799,108 @@
       script.src = url;
       script.onerror = function() {
         cleanup();
+        resolve(null);
+      };
+      document.head.appendChild(script);
+    });
+  }
+
+  function sleep(ms){ return new Promise(r=>setTimeout(r, ms|AF1Qip[a-zA-Z0-9_-]+)"/);
+          
+          let panoDate = null;
+          const dateStrMatch = str.match(/"(\d{4}-\d{2})"/);
+          if (dateStrMatch) {
+            panoDate = dateStrMatch[1];
+          } else {
+            const dateArrMatch = str.match(/\[(20\d{2}),\s*([1-9]|1[02])\]/);
+            if (dateArrMatch) {
+              panoDate = `${dateArrMatch[1]}-${dateArrMatch[2].padStart(2, '0')}`;
+            }
+          }
+
+          if (matchPano && matchPano[1]) {
+            resolve({
+              panoId: matchPano[1],
+              panoDate: panoDate
+            });
+          } else {
+            resolve(null);
+          }
+        } catch(e) {
+          resolve(null);
+        }
+      };
+
+      const url = `https://maps.googleapis.com/maps/api/js/GeoPhotoService.SingleImageSearch?pb=!1m5!1sapiv3!5sUS!11m2!1m1!1b0!2m4!1m2!3d${lat}!4d${lng}!2d100!3m10!2m2!1sen!2sGB!9m1!1e2!11m4!1m3!1e2!2b1!3e2!4m10!1e1!1e2!1e3!1e4!1e8!1e6!5m1!1e2!6m1!1e2&callback=${cbName}`;
+      
+      const script = document.createElement('script');
+      script.src = url;
+      script.onerror = function() {
+        cleanup)); }
+
+  startAutoBtn.addEventListener("click", async ()=>{
+    if (autoRunning) return;
+    const key = apiKeyInput.value.trim();
+    const targets = currentPoints.filter(p => !hasPano(p.custom));
+    if (!targets.length) return;
+
+    autoRunning = true;
+    autoCancelled = false;
+    startAutoBtn.disabled = true;
+    cancelAutoBtn.style.display = "inline-block";
+    autoBar.style.width = "0%";
+
+    let svc = null;
+    if (key) {
+      autoProgressEl.textContent = "Loading Google Maps SDK…";
+      try{
+        await loadGoogleMapsSdk(key);
+        svc = new google.maps.StreetViewService();
+      }catch(e){
+        autoProgressEl.textContent = "SDK load failed. Check your API key.";
+        autoRunning = false;
+        startAutoBtn.disabled = false;
+        cancelAutoBtn.style.display = "none";
+        return;
+      }
+    } else {
+      autoProgressEl.textContent = "No-Key mode enabled. Starting search...";
+    }
+
+    let done = 0, foundCount = 0, missCount = 0;
+    const total = targets.length;
+
+    for (const p of targets){
+      if (autoCancelled) break;
+
+      let result = null;
+      if (svc) {
+        result = await getPanoramaWithKey(svc, p.lat, p.lng);
+      } else {
+        result = await getPanoramaNoKey(p.lat, p.lng);
+      }
+
+      if (result){
+        p.custom.extra = p.custom.extra || {};
+        p.custom.extra.panoId = result.panoId;
+        if (result.panoDate) p.custom.extra.panoDate = result.panoDate;
+        foundCount++;
+        refreshMarkerColor(p);
+      } else {
+        missCount++;
+      }
+      done++;
+      autoBar.style.width = `${Math.round(done/total*100)}%`;
+      autoProgressEl.textContent = `Progress: ${done} / ${total} | Found: ${foundCount} | Not found: ${missCount}`;
+      
+      await sleep(svc ? 120 : 200);
+    }
+
+    autoRunning = false;
+    startAutoBtn.disabled = false;
+    cancelAutoBtn.style.display = "none";
+    autoProgressEl.textContent = autoCancelled ? "Auto-fill cancelled." : `Auto-fill complete. Found: ${foundCount}, Not found: ${missCount}`;
+    rawJsonEl.textContent = JSON.stringify({name: mapNameInput.value.();
         resolve(null);
       };
       document.head.appendChild(script);
@@ -953,7 +1938,6 @@
       autoProgressEl.textContent = "No-Key mode enabled. Starting search...";
     }
 
-    const defaultZoom = parseFloat(zoomDefaultInput.value);
     let done = 0, foundCount = 0, missCount = 0;
     const total = targets.length;
 
@@ -971,9 +1955,6 @@
         p.custom.extra = p.custom.extra || {};
         p.custom.extra.panoId = result.panoId;
         if (result.panoDate) p.custom.extra.panoDate = result.panoDate;
-        if (!p.custom.zoom || p.custom.zoom === 0){
-          if (!isNaN(defaultZoom)) p.custom.zoom = defaultZoom;
-        }
         foundCount++;
         refreshMarkerColor(p);
       } else {
@@ -993,7 +1974,22 @@
     rawJsonEl.textContent = JSON.stringify({name: mapNameInput.value.trim() || "map", customCoordinates: currentPoints.map(p=>p.custom)}, null, 2).slice(0, 20000);
 
     // ============================================================
-    // LIGHT UP & ENABLE "Export Auto-Filled JSON" button upon completion!
+    // LIGHT UP & ENABLE "trim() || "map", customCoordinates: currentPoints.map(p=>p.custom)}, null, 2).slice(0, 20000);
+
+    // Light up & enable "Export Auto-Filled JSON" button upon completion!
+    downloadAutoFilledBtn.disabled = false;
+    downloadAutoFilledBtn.classList.add("highlighted");
+  });
+
+  cancelAutoBtn.addEventListener("click", ()=>{ autoCancelled = true; });
+
+  urlInput.focus();
+
+})();
+</script>
+</body>
+</html>
+```Export Auto-Filled JSON" button upon completion!
     // ============================================================
     downloadAutoFilledBtn.disabled = false;
     downloadAutoFilledBtn.classList.add("highlighted");
