@@ -223,6 +223,7 @@
   .row label{font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; cursor:pointer;}
   #mapNameInput{flex:1; min-width:0;}
   #apiKeyInput{width:100%;}
+  #zoomDefaultInput{width:110px;}
   #autoPanel{display:none;}
   #autoProgress{font-size:11.5px; color:var(--muted); margin-top:8px; line-height:1.5;}
   .barOuter{
@@ -373,6 +374,11 @@
           </div>
 
           <div class="row" style="margin-top:10px;">
+            <label style="gap:6px;"><span>Default zoom applied:</span>
+              <input type="number" id="zoomDefaultInput" step="0.0001" value="0.16992500144231237">
+            </label>
+          </div>
+          <div class="row">
             <button id="startAutoBtn">Start Auto-Fill</button>
             <button class="secondary" id="cancelAutoBtn" style="display:none;">Cancel</button>
           </div>
@@ -456,6 +462,7 @@
   const advancedToggleBtn = document.getElementById("advancedToggleBtn");
   const advancedBox = document.getElementById("advancedBox");
   const apiKeyInput = document.getElementById("apiKeyInput");
+  const zoomDefaultInput = document.getElementById("zoomDefaultInput");
   const startAutoBtn = document.getElementById("startAutoBtn");
   const cancelAutoBtn = document.getElementById("cancelAutoBtn");
   const autoProgressEl = document.getElementById("autoProgress");
@@ -946,6 +953,7 @@
       autoProgressEl.textContent = "No-Key mode enabled. Starting search...";
     }
 
+    const defaultZoom = parseFloat(zoomDefaultInput.value);
     let done = 0, foundCount = 0, missCount = 0;
     const total = targets.length;
 
@@ -963,6 +971,9 @@
         p.custom.extra = p.custom.extra || {};
         p.custom.extra.panoId = result.panoId;
         if (result.panoDate) p.custom.extra.panoDate = result.panoDate;
+        if (!p.custom.zoom || p.custom.zoom === 0){
+          if (!isNaN(defaultZoom)) p.custom.zoom = defaultZoom;
+        }
         foundCount++;
         refreshMarkerColor(p);
       } else {
