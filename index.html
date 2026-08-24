@@ -427,7 +427,7 @@
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
 
   <div id="landingExample">https://example.com/api/map-data</div>
-  <div class="credit-tag">v0.8 · Human Prompted, AI Crafted</div>
+  <div class="credit-tag">v0.9 · Human Prompted, AI Crafted</div>
 </div>
 
 <div id="app">
@@ -511,7 +511,7 @@
       </div>
 
       <div class="panel" style="text-align:center; color:var(--muted); font-size:11px;">
-        v0.8 · Human Prompted, AI Crafted
+        v0.9 · Human Prompted, AI Crafted
       </div>
 
     </div>
@@ -772,23 +772,19 @@
     }
   });
 
-  // ========== 刪除地點功能 ==========
   function deletePoint(id) {
     const idx = currentPoints.findIndex(p => p.id === id);
     if (idx !== -1) {
       const p = currentPoints[idx];
       
-      // 1. 移除地圖標記
       if (p.marker) {
         clusterGroup.removeLayer(p.marker);
       }
       
-      // 2. 從陣列移除
       currentPoints.splice(idx, 1);
       
-      // 3. 更新 UI
       renderRawJsonDisplay();
-      setStatus(`已刪除 1 個地點。總計剩餘: ${currentPoints.length}`, "ok");
+      setStatus(`Deleted 1 location. Total remaining: ${currentPoints.length}`, "ok");
       
       if (currentPoints.length === 0) {
          downloadAutoFilledBtn.disabled = true;
@@ -797,14 +793,13 @@
     }
   }
 
-  // 監聽 Popup 開啟，綁定刪除按鈕事件
   map.on('popupopen', function(e) {
     const popupNode = e.popup._contentNode;
     if (!popupNode) return;
     const delBtn = popupNode.querySelector('.delete-point-btn');
     if (delBtn) {
       delBtn.addEventListener('click', () => {
-        const confirmDel = confirm("確定要刪除這個地點嗎？\nAre you sure you want to delete this location?");
+        const confirmDel = confirm("Are you sure you want to delete this location?");
         if (confirmDel) {
           const id = delBtn.getAttribute('data-id');
           deletePoint(id);
@@ -933,9 +928,9 @@
       renderRawJsonDisplay();
       downloadAutoFilledBtn.disabled = false;
 
-      setStatus(`已自動矯正並新增點位 (Auto-corrected to actual panorama). Total: ${currentPoints.length}`, "ok");
+      setStatus(`Auto-corrected and added point to actual panorama. Total: ${currentPoints.length}`, "ok");
     } else {
-      setStatus(`無法找到：此位置附近太遠或沒有街景 (Too far / Not found).`, "err");
+      setStatus(`Too far or no Street View found near this location.`, "err");
     }
   });
 
@@ -1075,7 +1070,7 @@
     return `<div class="sv-popup">` +
       `<iframe src="${embedUrl}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>` +
       `<div class="sv-coords">${lat.toFixed(6)}, ${lng.toFixed(6)}</div>` +
-      `<button class="danger-ghost delete-point-btn" data-id="${p.id}" style="width:100%;">🗑️ 刪除此地點 (Delete)</button>` +
+      `<button class="danger-ghost delete-point-btn" data-id="${p.id}" style="width:100%;">🗑️ Delete</button>` +
     `</div>`;
   }
 
@@ -1087,7 +1082,7 @@
       `<pre style="margin:0 0 8px;">${escapeHtml(jsonText)}</pre>` +
       `<div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">` +
         `<a href="${svUrl}" target="_blank" rel="noopener noreferrer">Open in Maps ↗</a>` +
-        `<button class="danger-ghost delete-point-btn" data-id="${p.id}" style="padding:4px 8px;">🗑️ 刪除</button>` +
+        `<button class="danger-ghost delete-point-btn" data-id="${p.id}" style="padding:4px 8px;">🗑️ Delete</button>` +
       `</div>` +
     `</div>`;
   }
