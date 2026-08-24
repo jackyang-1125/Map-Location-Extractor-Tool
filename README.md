@@ -28,7 +28,7 @@ Double-click the downloaded **`index.html`** file, or drag and drop it into any 
 
 > **Paste any URL returning location JSON data, instantly visualize markers on an interactive map, and auto-fill missing Street View data with zero backend hassle!**
 
-[GitHub Repository / Live Demo](https://www.google.com/search?q=%23) · **v0.1** · *Human Prompted, AI Crafted*
+**v0.1** · *Human Prompted, AI Crafted*
 
 ---
 
